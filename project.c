@@ -41,6 +41,24 @@ struct trainer_attribute
     int max_students;
 };
 
+//Function to initialize the trainer DB
+
+void Initialize_trainer_DB(struct trainer_attribute trainers[], int size_trainers)
+{
+    for(int i=0; i<size_trainers; i++)
+    {
+        trainers[i].trainer_id = 0;
+        trainers[i].trainer_name = '\0';
+        trainers[i].trainer_elo_rating = 0.0;
+        trainers[i].coaching_style = '\0';
+        trainers[i].free_time_slot = '\0';
+        trainers[i].experience_level = 0;
+        trainers[i].qualify_elo = 0.0;
+        trainers[i].max_students = 0;
+
+    }
+}
+
 // Function to Initialize the student DB
 
 void Initialize_student_DB(struct student_attribute students[], int size)
@@ -62,6 +80,74 @@ void Initialize_student_DB(struct student_attribute students[], int size)
         for(int j = 0; j < 12; j++)
         {
             students[i].data.ratings[j] = 0;
+        }
+    }
+}
+
+//Function to insert update trainer records
+
+int insert_update_trainer(struct trainer_attribute trainer_DB[], int size, int train_id, char train_name[], float train_elo_rating, char coach_style[], char slot[], int experience, float qualify, int max)
+{
+
+    // Check if corresponding data exists for trainer
+
+    int status = SUCCESS;
+    int i=0,j,found=0,free_loc;
+    while(i<size && !found)
+    {
+        if((strcmp(trainer_DB[i].trainer_name, train_name) == 0) && (trainer_DB[i].trainer_id == train_id))
+        {
+            found = 1;
+        }
+        else
+        {
+            i++;
+        }
+    }
+
+    // Update trainer data
+
+    if(found)
+    {
+        trainer_DB[i].trainer_elo_rating = train_elo_rating;
+        strcpy(trainer_DB[i].coaching_style, coach_style);
+        strcpy(trainer_DB[i].free_time_slot, slot);
+        trainer_DB[i].experience_level = experience;
+        trainer_DB[i].qualify_elo = qualify;
+        trainer_DB[i].max_students = max;       
+    }
+    else
+    {
+        j = 0, free_loc = 0;
+        while(j<size && free_loc == 0)
+        {
+            if(trainer_DB[j].trainer_name == '\0' && trainer_DB[j].trainer_id == 0)
+            {
+                free_loc = 1;
+            }
+            else
+            {
+                j++;
+            }
+        }
+
+        // If free location found insert the trainer data
+
+        if(free_loc)
+        {
+            trainer_DB[i].trainer_id = train_id;
+            strcpy(trainer_DB[i].trainer_name, train_name);
+            trainer_DB[i].trainer_elo_rating = train_elo_rating;
+            strcpy(trainer_DB[i].coaching_style, coach_style);
+            strcpy(trainer_DB[i].free_time_slot, slot);
+            trainer_DB[i].experience_level = experience;
+            trainer_DB[i].qualify_elo = qualify;
+            trainer_DB[i].max_students = max; 
+        }
+
+        else
+        {
+            status = FAILURE;
         }
     }
 }
@@ -221,6 +307,15 @@ void main()
         
         status1 = insert_update_student(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating, goals, slot, style, assigned_train_id, performance, info);
 
+        if(!status1)
+        {
+            printf("Database overload! Come next time\n");
+        }
+        else 
+        {
+            printf("Student data updated successfully\n");
+        }
+        
     }
 
     int flag;

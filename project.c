@@ -10,6 +10,7 @@
 #define STUD_DB_SIZE 500
 #define SUCCESS 1
 #define FAILURE 0
+#define TRAIN_DB_SIZE 250
 
 struct progress{
     int games_won;
@@ -48,10 +49,10 @@ void Initialize_trainer_DB(struct trainer_attribute trainers[], int size_trainer
     for(int i=0; i<size_trainers; i++)
     {
         trainers[i].trainer_id = 0;
-        trainers[i].trainer_name = '\0';
+        trainers[i].trainer_name[0] = '\0';
         trainers[i].trainer_elo_rating = 0.0;
-        trainers[i].coaching_style = '\0';
-        trainers[i].free_time_slot = '\0';
+        trainers[i].coaching_style[0] = '\0';
+        trainers[i].free_time_slot[0] = '\0';
         trainers[i].experience_level = 0;
         trainers[i].qualify_elo = 0.0;
         trainers[i].max_students = 0;
@@ -215,7 +216,6 @@ int insert_update_student(struct student_attribute student_DB[], int size, char 
                 student_DB[j].data.ratings[k] = info.ratings[k];
             }
         }
-
         else
         {
             status = FAILURE;
@@ -263,6 +263,36 @@ int delete_student_record(struct student_attribute student_DB[], int size, char 
     return status;
 }
 
+//Delete trainer record
+
+int delete_trainer_record(struct trainer_attribute trainer_DB[], int size, char train_name[], int train_id){
+    int status = SUCCESS;
+    int i=0, found=0;
+    while(i<size && !found) {
+        if(strcmp(trainer_DB[i].trainer_name, train_name) == 0 && trainer_DB[i].trainer_id == train_id) {
+            found=1;
+        }
+        else {
+            i++;
+        }
+    }
+
+    if(found){
+        trainer_DB[i].trainer_id = 0;
+        trainer_DB[i].trainer_name[0] = '\0';
+        trainer_DB[i].trainer_elo_rating = 0.0;
+        trainer_DB[i].coaching_style[0] = '\0';
+        trainer_DB[i].free_time_slot[0] = '\0';
+        trainer_DB[i].experience_level = 0;
+        trainer_DB[i].qualify_elo = 0.0;
+        trainer_DB[i].max_students = 0;
+    }
+    else {
+        status = FAILURE;
+    }
+    return status;
+}
+
 
 void main()
 {
@@ -280,9 +310,22 @@ void main()
     struct student_attribute student_DB[STUD_DB_SIZE];
     int status1, status2;
 
+    //trainer info variables
+    int train_id; 
+    char train_name[NAME_LEN]; 
+    float train_elo_rating; 
+    char coach_style[STYLE]; 
+    char train_slot[SLOT]; 
+    int experience; 
+    float qualify; 
+    int max, train_records, status3, status4;
+    struct trainer_attribute trainer_DB[TRAIN_DB_SIZE];
+
+
     // Intializing DB vales to zero.
 
     Initialize_student_DB(student_DB, STUD_DB_SIZE);
+    Initialize_trainer_DB(trainer_DB, TRAIN_DB_SIZE);
 
     // Asking number of student records and taking input.
 
@@ -318,6 +361,33 @@ void main()
         
     }
 
+    printf("How many trainer records do you want to enter? ");
+    scanf("%d", &train_records);
+
+    for(int i=0; i< train_records; i++) {
+        scanf("%d", train_id);
+        scanf("%s", train_name);
+        scanf("%f", train_elo_rating);
+        scanf("%s", coach_style);
+        scanf("%f", train_slot);
+        scanf("%d", experience);
+        scanf("%f", qualify);
+        scanf("%d", max);
+
+        status3 = insert_update_trainer(trainer_DB, TRAIN_DB_SIZE, train_id, train_name, train_elo_rating, coach_style, train_slot, experience, qualify, max);
+
+        if(!status3)
+        {
+            printf("Database is full! Apply next time\n");
+        }
+        else 
+        {
+            printf("Trainer data updated successfully\n");
+        }
+
+    }
+
+    //To delete a student record
     int flag;
     printf("Do you want to delete any student: enter 1 for YES and 0 for NO");
     scanf("%d",&flag);
@@ -340,4 +410,24 @@ void main()
         }
     }
     
+    //To delete a trainer record
+    int temp;
+    printf("Do you want to delete a trainer record?: enter 1 for yes and 0 for No ");
+    scanf("%d", &temp);
+
+    if(temp) {
+        printf("Enter trainer name to be deleted: ");
+        scanf("%s", &train_name);
+        printf("enter trainer ID: ");
+        scanf("%d", train_id);
+
+        status4 = delete_trainer_record(trainer_DB, train_records, train_name, train_id);
+
+        if(status4) {
+            printf("Trainer record deleted successfully\n");
+        }
+        else {
+            printf("No trainer record found\n");
+        }
+    }
 }

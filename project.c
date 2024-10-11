@@ -43,7 +43,7 @@ struct trainer_attribute
 
 // Function to Initialize the student DB
 
-void Initialize_DB(struct student_attribute students[], int size)
+void Initialize_student_DB(struct student_attribute students[], int size)
 {
     for(int i=0; i<size; i++)
     {
@@ -154,7 +154,7 @@ void main()
 
     // Intializing DB vales to zero.
 
-    Initialize_DB(student_DB, STUD_DB_SIZE);
+    Initialize_student_DB(student_DB, STUD_DB_SIZE);
 
     // Asking number of student records and taking input.
 

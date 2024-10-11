@@ -91,8 +91,8 @@ int insert_update_student(struct student_attribute student_DB[], int size, char 
 
     if(found)
     {
-        strcpy(student_DB[i].student_name, stud_name);
-        student_DB[i].student_elo_rating = stud_elo_rating;
+        // strcpy(student_DB[i].student_name, stud_name);
+        // student_DB[i].student_elo_rating = stud_elo_rating;
 
         //Check once!
     }

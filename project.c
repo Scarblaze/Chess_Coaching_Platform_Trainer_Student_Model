@@ -137,6 +137,47 @@ int insert_update_student(struct student_attribute student_DB[], int size, char 
     }
 }
 
+//Deleting student record function
+
+int delete_student_record(struct student_attribute student_DB[], int size, char stud_name[], float stud_elo_rating)
+{
+    int status = SUCCESS;
+    int i=0, found=0;
+    while(i<size && !found)
+    {
+        if((strcmp(student_DB[i].student_name, stud_name)) == 0 && (student_DB[i].student_elo_rating == stud_elo_rating))
+        {
+            found = 1;
+        }
+        else
+        {
+            i++;
+        }
+    }
+    if(found)
+    {
+        student_DB[i].student_name[0] = '\0';
+        student_DB[i].student_elo_rating = 0;
+        student_DB[i].learn_goals[0] = '\0';
+        student_DB[i].time_slot[0] = '\0';
+        student_DB[i].preferred_coaching_style[0] = '\0';
+        student_DB[i].assigned_trainer_id = 0;
+        student_DB[i].performance_data[0] = '\0';
+        student_DB[i].data.games_won = 0;
+        student_DB[i].data.puzzles_solved = 0;
+        for(int j=0; j<12; j++)
+        {
+            student_DB[i].data.ratings[j] = 0;
+        }
+    }
+    else
+    {
+        status = FAILURE;
+    }
+    return status;
+}
+
+
 void main()
 {
     // student info variables
@@ -151,6 +192,7 @@ void main()
     struct progress info;
     int status;
     struct student_attribute student_DB[STUD_DB_SIZE];
+    int status1, status2;
 
     // Intializing DB vales to zero.
 
@@ -177,6 +219,30 @@ void main()
             scanf("%s",&info.ratings[j]);
         }
         
-        int status = insert_update_student(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating, goals, slot, style, assigned_train_id, performance, info);
+        status1 = insert_update_student(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating, goals, slot, style, assigned_train_id, performance, info);
+
     }
+
+    int flag;
+    printf("Do you want to delete any student: enter 1 for YES and 0 for NO");
+    scanf("%d",&flag);
+
+    if(flag)
+    {
+        printf("Enter the student name to be deleted; ");
+        scanf("%s",&stud_name);
+        printf("Enter the elo rating of student: ");
+        scanf("%f",&stud_elo_rating);
+        int status2 = delete_student_record(student_DB, STUD_DB_SIZE,stud_name, stud_elo_rating);
+
+        if(status2)
+        {
+            printf("Student Record deleted successfully!\n");
+        }
+        else
+        {
+            printf("No student record of given name exists!\n");
+        }
+    }
+    
 }

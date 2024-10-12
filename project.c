@@ -382,6 +382,74 @@ void merge_sort(struct student_attribute student_DB[], struct student_attribute 
     }
 }
 
+//Students Sort function for decreasing gains
+
+void mergeSelf_decreasing_gains(struct student_attribute student_DB[], int l, int m, int n, struct student_attribute temp[]){
+    int i, j, k;
+    i=l;
+    j=m+1;
+    k=l;
+
+    while((i<=m) && (j<=n)) {
+        if( (student_DB[i].data.ratings[11]-student_DB[i].data.ratings[0]) > (student_DB[j].data.ratings[11]-student_DB[j].data.ratings[0]) ) {
+            temp[k++] = student_DB[i++];
+        }
+        else {
+            temp[k++] = student_DB[j++];
+        }
+    }
+
+    if(i<=m){
+        while(i<=m){
+            temp[k++] = student_DB[i++];
+        }
+    }
+    else {
+        while(j<=n) {
+            temp[k++] = student_DB[j++];
+        }
+    }
+
+    for( i=l; i<=n; i++) {
+        student_DB[i] = temp[i];
+    }
+}
+
+void mergeSort_decreasing_gains( struct student_attribute student_DB[], struct student_attribute temp[], int lo, int hi){
+    int mid;
+    if(lo<hi) {
+        mid = (lo+hi)/2;
+        mergeSort_decreasing_gains(student_DB, temp, lo, mid);
+        mergeSort_decreasing_gains(student_DB, temp, mid+1, hi);
+        mergeSelf_decreasing_gains(student_DB, lo, mid, hi, temp);
+    }
+}
+
+
+int successive_increase(struct student_attribute student_DB[], int stud_records, struct student_attribute list[]){
+
+    int cnt=0;
+    int flag=0;
+    for(int i=0; i<stud_records; i++){
+        for(int j=1; j<12&&flag==0; i++){
+            if(student_DB[i].data.ratings[j]<student_DB[i].data.ratings[j-1]){
+                flag=1;
+            }
+        }
+        if(flag == 0){
+            cnt++;
+            strcpy(student_DB[i].student_name, list[i].student_name);
+            student_DB[i].student_elo_rating =  list[i].student_elo_rating;
+            strcpy(student_DB[i].learn_goals, list[i].learn_goals);
+            strcpy(student_DB[i].time_slot, list[i].time_slot);
+            strcpy(student_DB[i].preferred_coaching_style, list[i].preferred_coaching_style);
+            student_DB[i].assigned_trainer_id = list[i].assigned_trainer_id;
+            strcpy(student_DB[i].performance_data, list[i].performance_data);
+        }
+    }
+    return cnt;
+}
+
 void main()
 {
     // student info variables
@@ -527,4 +595,16 @@ void main()
 
     struct student_attribute temp[stud_records];
     sort_student_elo_rating(student_DB, stud_records);
+
+    //answer to question 12
+
+    struct student_attribute list[stud_records];
+
+    Initialize_student_DB(list, stud_records);
+
+    int size_succesive= successive_increase(student_DB, stud_records, list);
+
+    struct student_attribute temp[stud_records];
+
+    mergeSort_decreasing_gains(list, temp, 0, size_succesive-1);
 }

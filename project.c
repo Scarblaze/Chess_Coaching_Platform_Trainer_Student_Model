@@ -453,16 +453,13 @@ int successive_increase(struct student_attribute student_DB[], int stud_records,
         if (flag == 0)
         {
             cnt++;
-
-            // Check strcpy order is reverse !!!
-
-            strcpy(student_DB[i].student_name, list[i].student_name);
+            strcpy(list[i].student_name, student_DB[i].student_name,);
             student_DB[i].student_elo_rating = list[i].student_elo_rating;
-            strcpy(student_DB[i].learn_goals, list[i].learn_goals);
-            strcpy(student_DB[i].time_slot, list[i].time_slot);
-            strcpy(student_DB[i].preferred_coaching_style, list[i].preferred_coaching_style);
+            strcpy(list[i].learn_goals, student_DB[i].learn_goals);
+            strcpy(list[i].time_slot, student_DB[i].time_slot);
+            strcpy(list[i].preferred_coaching_style, student_DB[i].preferred_coaching_style);
             student_DB[i].assigned_trainer_id = list[i].assigned_trainer_id;
-            strcpy(student_DB[i].performance_data, list[i].performance_data);
+            strcpy(list[i].performance_data, student_DB[i].performance_data);
         }
     }
     return cnt;
@@ -611,7 +608,7 @@ void main()
 
     // Function call to sort student based on elo_rating.
 
-    struct student_attribute temp[stud_records];
+    struct student_attribute temp1[stud_records];
     sort_students_elo_rating(student_DB, stud_records);
 
     // answer to question 12
@@ -623,9 +620,7 @@ void main()
     int size_succesive = successive_increase(student_DB, stud_records, list);
 
 
-    // same temp used, check once !!
-
-    struct student_attribute temp[stud_records];
+    struct student_attribute temp2[stud_records];
 
     mergeSort_decreasing_gains(list, temp, 0, size_succesive - 1);
 }

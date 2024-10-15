@@ -453,7 +453,7 @@ int successive_increase(struct student_attribute student_DB[], int stud_records,
         if (flag == 0)
         {
             cnt++;
-            strcpy(list[i].student_name, student_DB[i].student_name,);
+            strcpy(list[i].student_name, student_DB[i].student_name, );
             student_DB[i].student_elo_rating = list[i].student_elo_rating;
             strcpy(list[i].learn_goals, student_DB[i].learn_goals);
             strcpy(list[i].time_slot, student_DB[i].time_slot);
@@ -465,27 +465,36 @@ int successive_increase(struct student_attribute student_DB[], int stud_records,
     return cnt;
 }
 
-struct stud_count{
+struct stud_count
+{
     int cnt;
 };
 
-struct matched{
+struct matched
+{
     char student_name_matched[NAME_LEN];
     char trainer_name_matched[NAME_LEN];
     int train_id_matched;
 };
 
-void match_pairs(struct stud_count count[], struct student_attribute a[], struct trainer_attribute b[], int stud_records, int train_records, struct matched c[]){
-    int flag=0;
-    for(int i=0; i<train_records; i++){
-        count[i].cnt=0;
+void match_pairs(struct stud_count count[], struct student_attribute a[], struct trainer_attribute b[], int stud_records, int train_records, struct matched c[])
+{
+    int flag = 0;
+    for (int i = 0; i < train_records; i++)
+    {
+        count[i].cnt = 0;
     }
-    for(int i=0; i<stud_records; i++){
-        for(int j=0; j<train_records&&flag==0; j++){
-            if(count[j].cnt<=b[j].max_students){
-                if(strcmp(a[i].time_slot, b[j].free_time_slot)==0){
-                    if(strcmp(a[i].preferred_coaching_style, b[j].coaching_style)==0 && a[i].student_elo_rating>=b[j].trainer_elo_rating){
-                        flag=1;
+    for (int i = 0; i < stud_records; i++)
+    {
+        for (int j = 0; j < train_records && flag == 0; j++)
+        {
+            if (count[j].cnt <= b[j].max_students)
+            {
+                if (strcmp(a[i].time_slot, b[j].free_time_slot) == 0)
+                {
+                    if (strcmp(a[i].preferred_coaching_style, b[j].coaching_style) == 0 && a[i].student_elo_rating >= b[j].trainer_elo_rating)
+                    {
+                        flag = 1;
                         count[j].cnt++;
                         strcpy(c[i].student_name_matched, a[i].student_name);
                         strcpy(c[i].trainer_name_matched, b[j].trainer_name);
@@ -650,7 +659,6 @@ void main()
     Initialize_student_DB(list, stud_records);
 
     int size_succesive = successive_increase(student_DB, stud_records, list);
-
 
     struct student_attribute temp2[stud_records];
 

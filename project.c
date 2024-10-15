@@ -465,6 +465,38 @@ int successive_increase(struct student_attribute student_DB[], int stud_records,
     return cnt;
 }
 
+struct stud_count{
+    int cnt;
+};
+
+struct matched{
+    char student_name_matched[NAME_LEN];
+    char trainer_name_matched[NAME_LEN];
+    int train_id_matched;
+};
+
+void match_pairs(struct stud_count count[], struct student_attribute a[], struct trainer_attribute b[], int stud_records, int train_records, struct matched c[]){
+    int flag=0;
+    for(int i=0; i<train_records; i++){
+        count[i].cnt=0;
+    }
+    for(int i=0; i<stud_records; i++){
+        for(int j=0; j<train_records&&flag==0; j++){
+            if(count[j].cnt<=b[j].max_students){
+                if(strcmp(a[i].time_slot, b[j].free_time_slot)==0){
+                    if(strcmp(a[i].preferred_coaching_style, b[j].coaching_style)==0 && a[i].student_elo_rating>=b[j].trainer_elo_rating){
+                        flag=1;
+                        count[j].cnt++;
+                        strcpy(c[i].student_name_matched, a[i].student_name);
+                        strcpy(c[i].trainer_name_matched, b[j].trainer_name);
+                        strcpy(c[i].train_id_matched, b[j].trainer_name);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void main()
 {
     // student info variables

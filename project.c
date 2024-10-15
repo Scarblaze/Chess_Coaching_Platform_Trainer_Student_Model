@@ -783,9 +783,7 @@ void main()
 
     int count[train_records];
 
-    struct matched assigned[stud_records];
-
-    match_pairs(count, student_DB, trainer_DB, stud_records, train_records, assigned);
+    match_pairs(count, student_DB, trainer_DB, stud_records, train_records);
 
 
 }

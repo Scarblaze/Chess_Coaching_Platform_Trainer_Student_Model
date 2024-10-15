@@ -671,6 +671,64 @@ void mergeSort_popularity(struct trainer_attribute trainer_DB[], struct trainer_
     }
 }
 
+void merge_self_strongest(struct trainer_attribute trainer_DB[], int l, int m, int n, struct trainer_attribute temp[], float average[])
+{
+    int i, j, k;
+    i = l;
+    j = m + 1;
+    k = l;
+    while ((i <= m) && (j <= n))
+    {
+        if (average[i]>=average[j])
+        {
+            temp[k++] = trainer_DB[i++];
+        }
+        else
+        {
+            temp[k++] = trainer_DB[j++];
+        }
+    }
+
+    if (i <= m)
+    {
+        while (i <= m)
+        {
+            temp[k++] = trainer_DB[i++];
+        }
+    }
+    else
+    {
+        while (j <= n)
+        {
+            temp[k++] = trainer_DB[j++];
+        }
+    }
+
+    for (i = l; i <= n; i++)
+    {
+        trainer_DB[i] = temp[i];
+    }
+}
+
+void mergeSort_strongest(struct trainer_attribute trainer_DB[], struct trainer_attribute temp[], int lo, int hi, float average[])
+{
+    int mid;
+    if (lo < hi)
+    {
+        mid = lo + (hi - lo)/2;
+        mergeSort_strongest(trainer_DB, temp, lo, mid, average);
+        mergeSort_strongest(trainer_DB, temp, mid + 1, hi, average);
+        merge_self_strongest(trainer_DB, lo, mid, hi, temp, average);
+    }
+}
+
+void strongest_trainer(struct trainer_attribute trainer_DB[], float avg_elo[], int train_records)
+{
+    struct trainer_attribute temp[train_records];
+    mergeSort_strongest(trainer_DB, temp, 0, train_records - 1, avg_elo);
+
+}
+
 
 void main()
 {

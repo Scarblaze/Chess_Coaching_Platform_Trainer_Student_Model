@@ -610,6 +610,20 @@ void merge_self_popularity(struct student_attribute student_DB[], int l, int m, 
     
 }
 
+struct find_strongest_trainer
+{
+    int trainer_id;
+    char trainer_name[NAME_LEN];
+    float avg_elo_rating;
+
+}
+
+void strongest_trainer(struct student_attribute a[], struct trainer_attribute b[], float avg_elo[])
+{
+
+}
+
+
 void main()
 {
     // student info variables

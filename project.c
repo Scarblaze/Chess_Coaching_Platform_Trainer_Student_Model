@@ -475,6 +475,7 @@ struct matched
     char student_name_matched[NAME_LEN];
     char trainer_name_matched[NAME_LEN];
     int train_id_matched;
+    float student_elo;
 };
 
 void match_pairs(int count[], struct student_attribute a[], struct trainer_attribute b[], int stud_records, int train_records, struct matched c[])
@@ -502,6 +503,7 @@ void match_pairs(int count[], struct student_attribute a[], struct trainer_attri
                             strcpy(c[i].student_name_matched, a[i].student_name);
                             strcpy(c[i].trainer_name_matched, b[j].trainer_name);
                             strcpy(c[i].train_id_matched, b[j].trainer_name);
+                            c[i].student_elo = a[i].student_elo_rating;
                         }
 
                         else
@@ -514,6 +516,7 @@ void match_pairs(int count[], struct student_attribute a[], struct trainer_attri
                                 strcpy(c[i].student_name_matched, a[i].student_name);
                                 strcpy(c[i].trainer_name_matched, b[j].trainer_name);
                                 strcpy(c[i].train_id_matched, b[j].trainer_name);
+                                c[i].student_elo = a[i].student_elo_rating;
                             }
                         }
                     }
@@ -530,6 +533,7 @@ void match_pairs(int count[], struct student_attribute a[], struct trainer_attri
                                 strcpy(c[i].student_name_matched, a[i].student_name);
                                 strcpy(c[i].trainer_name_matched, b[j].trainer_name);
                                 strcpy(c[i].train_id_matched, b[j].trainer_name);
+                                c[i].student_elo = a[i].student_elo_rating;
                             }
                         }
                     }
@@ -537,6 +541,65 @@ void match_pairs(int count[], struct student_attribute a[], struct trainer_attri
             }
         }
     }
+}
+
+// float average_elo_rating(struct matched a[], int train_id, int stud_records){
+//     float sum = 0;
+//     int cnt=0;
+//     for(int i=0; i<stud_records; i++) {
+//         if(a[i].train_id_matched==train_id){
+//             sum = sum + a[i].student_elo;
+//             cnt++;
+//         }
+//     }
+//     return sum/(float)cnt;
+// }
+
+void most_popular_trainer(int stud_records, int train_records, struct matched a[], struct trainer_attribute trainer_DB[])
+{
+    int cnt = 0;
+    int loc = 0;
+    int max = 0;
+    float max_avg = 0;
+    float avg;
+    float sum = 0;
+    int cnt2 = 0;
+
+    for (int i = 0; i < train_records; i++)
+    {
+        for (int j = 0; j < stud_records; j++)
+        {
+            if (trainer_DB[i].trainer_id == a[j].train_id_matched)
+            {
+                cnt++;
+            }
+        }
+
+        if (cnt > max)
+        {
+            max = cnt;
+            loc = i;
+        }
+        else if (cnt == max)
+        {
+            max = cnt;
+            for (int k = 0; k < stud_records; k++)
+            {
+                if (a[k].train_id_matched == trainer_DB[i].trainer_id)
+                {
+                    sum = sum + a[k].student_elo;
+                    cnt++;
+                }
+            }
+            avg = sum / (float)cnt;
+            if (avg > max_avg)
+            {
+                max_avg = avg;
+                loc = i;
+            }
+        }
+    }
+    printf("most popular trainer name: %c\n trainer ID: %d\n", trainer_DB[loc].trainer_name, trainer_DB[loc].trainer_id);
 }
 
 void main()

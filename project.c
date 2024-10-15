@@ -602,12 +602,73 @@ void most_popular_trainer(int stud_records, int train_records, struct student_at
     printf("most popular trainer name: %c\n trainer ID: %d\n", trainer_DB[loc].trainer_name, trainer_DB[loc].trainer_id);
 }
 
-void merge_self_popularity(struct student_attribute student_DB[], int l, int m, int n, struct student_attribute temp[]){
+void average_elo(struct trainer_attribute trainer_DB[], struct student_attribute student_DB[], int stud_records, int train_records, float average[]){
+    float sum=0;
+    int cnt=0;
+    for(int i=0; i<train_records; i++){
+        for(int j=0; j<stud_record; j++){
+            if(trainer_DB[i].trainer_id==student_DB[j].assigned_trainer_id){
+                sum = sum + student_DB[j].student_elo_rating;
+                cnt++;
+            }
+        }
+        average[i]= sum/(float)cnt;
+    }
+}
+
+void merge_self_popularity(struct trainer_attribute trainer_DB[], int l, int m, int n, struct trainer_attribute temp[], float average[], int count[]){
     int i, j, k;
     i = l;
     j = m + 1;
     k = l;
-    
+    while ((i <= m) && (j <= n))
+    {
+        if (count[i]>count[j])
+        {
+            temp[k++] = trainer_DB[i++];
+        }
+        else if(count[i]==count[j]){
+            if(average[i]>average[j]){
+                temp[k++] = trainer_DB[i++];
+            }
+        }
+        else
+        {
+            temp[k++] = trainer_DB[j++];
+        }
+    }
+
+    if (i <= m)
+    {
+        while (i <= m)
+        {
+            temp[k++] = trainer_DB[i++];
+        }
+    }
+    else
+    {
+        while (j <= n)
+        {
+            temp[k++] = trainer_DB[j++];
+        }
+    }
+
+    for (i = l; i <= n; i++)
+    {
+        trainer_DB[i] = temp[i];
+    }
+}
+
+void mergeSort_popularity(struct trainer_attribute trainer_DB[], struct trainer_attribute temp[], int lo, int hi, float average[], int count[])
+{
+    int mid;
+    if (lo < hi)
+    {
+        mid = (lo + hi) / 2;
+        mergeSort_popularity(trainer_DB, temp, lo, mid, average, count);
+        mergeSort_popularity(trainer_DB, temp, mid + 1, hi, average, count);
+        merge_self_popularity(trainer_DB, lo, mid, hi, temp, average, count);
+    }
 }
 
 struct find_strongest_trainer
@@ -785,5 +846,9 @@ void main()
 
     match_pairs(count, student_DB, trainer_DB, stud_records, train_records);
 
+    float average[train_records];
+    average_elo(trainer_DB, student_DB,  stud_records,  train_records, average);
+
+    mergeSort_popularity(trainer_DB,temp[], 0 , train_records-1, average, count);
 
 }

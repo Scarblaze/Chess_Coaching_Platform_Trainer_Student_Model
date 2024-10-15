@@ -555,58 +555,58 @@ void match_pairs(int count[], struct student_attribute a[], struct trainer_attri
 //     return sum/(float)cnt;
 // }
 
-void most_popular_trainer(int stud_records, int train_records, struct student_attribute student_DB[], struct trainer_attribute trainer_DB[])
-{
-    int cnt = 0;
-    int loc = 0;
-    int max = 0;
-    float max_avg = 0;
-    float avg;
-    float sum = 0;
-    int cnt2 = 0;
+// void most_popular_trainer(int stud_records, int train_records, struct student_attribute student_DB[], struct trainer_attribute trainer_DB[])
+// {
+//     int cnt = 0;
+//     int loc = 0;
+//     int max = 0;
+//     float max_avg = 0;
+//     float avg;
+//     float sum = 0;
+//     int cnt2 = 0;
 
-    for (int i = 0; i < train_records; i++)
-    {
-        for (int j = 0; j < stud_records; j++)
-        {
-            if (trainer_DB[i].trainer_id == student_DB[j].assigned_trainer_id)
-            {
-                cnt++;
-            }
-        }
+//     for (int i = 0; i < train_records; i++)
+//     {
+//         for (int j = 0; j < stud_records; j++)
+//         {
+//             if (trainer_DB[i].trainer_id == student_DB[j].assigned_trainer_id)
+//             {
+//                 cnt++;
+//             }
+//         }
 
-        if (cnt > max)
-        {
-            max = cnt;
-            loc = i;
-        }
-        else if (cnt == max)
-        {
-            max = cnt;
-            for (int k = 0; k < stud_records; k++)
-            {
-                if (student_DB[k].assigned_trainer_id == trainer_DB[i].trainer_id)
-                {
-                    sum = sum + student_DB[k].student_elo_rating;
-                    cnt++;
-                }
-            }
-            avg = sum / (float)cnt;
-            if (avg > max_avg)
-            {
-                max_avg = avg;
-                loc = i;
-            }
-        }
-    }
-    printf("most popular trainer name: %c\n trainer ID: %d\n", trainer_DB[loc].trainer_name, trainer_DB[loc].trainer_id);
-}
+//         if (cnt > max)
+//         {
+//             max = cnt;
+//             loc = i;
+//         }
+//         else if (cnt == max)
+//         {
+//             max = cnt;
+//             for (int k = 0; k < stud_records; k++)
+//             {
+//                 if (student_DB[k].assigned_trainer_id == trainer_DB[i].trainer_id)
+//                 {
+//                     sum = sum + student_DB[k].student_elo_rating;
+//                     cnt++;
+//                 }
+//             }
+//             avg = sum / (float)cnt;
+//             if (avg > max_avg)
+//             {
+//                 max_avg = avg;
+//                 loc = i;
+//             }
+//         }
+//     }
+//     printf("most popular trainer name: %c\n trainer ID: %d\n", trainer_DB[loc].trainer_name, trainer_DB[loc].trainer_id);
+// }
 
 void average_elo(struct trainer_attribute trainer_DB[], struct student_attribute student_DB[], int stud_records, int train_records, float average[]){
     float sum=0;
     int cnt=0;
     for(int i=0; i<train_records; i++){
-        for(int j=0; j<stud_record; j++){
+        for(int j=0; j<stud_records; j++){
             if(trainer_DB[i].trainer_id==student_DB[j].assigned_trainer_id){
                 sum = sum + student_DB[j].student_elo_rating;
                 cnt++;
@@ -669,19 +669,6 @@ void mergeSort_popularity(struct trainer_attribute trainer_DB[], struct trainer_
         mergeSort_popularity(trainer_DB, temp, mid + 1, hi, average, count);
         merge_self_popularity(trainer_DB, lo, mid, hi, temp, average, count);
     }
-}
-
-struct find_strongest_trainer
-{
-    int trainer_id;
-    char trainer_name[NAME_LEN];
-    float avg_elo_rating;
-
-}
-
-void strongest_trainer(struct student_attribute a[], struct trainer_attribute b[], float avg_elo[])
-{
-
 }
 
 
@@ -844,11 +831,14 @@ void main()
 
     int count[train_records];
 
-    match_pairs(count, student_DB, trainer_DB, stud_records, train_records);
+    struct matched assigned[stud_records];
+
+    match_pairs(count, student_DB, trainer_DB, stud_records, train_records, assigned);
 
     float average[train_records];
     average_elo(trainer_DB, student_DB,  stud_records,  train_records, average);
 
-    mergeSort_popularity(trainer_DB,temp[], 0 , train_records-1, average, count);
+    mergeSort_popularity(trainer_DB, temp, 0 , train_records-1, average, count);
 
+    printf("Most popular trainer: %c\n Trainer ID:\n", trainer_DB[0].trainer_name, trainer_DB[0].trainer_id);
 }

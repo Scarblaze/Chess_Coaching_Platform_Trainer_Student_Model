@@ -4,7 +4,7 @@
 
 #define NAME_LEN 100
 #define GOALS 50
-#define SLOT 25
+#define SLOT 5
 #define STYLE 25
 #define PERFORMANCE 50
 #define STUD_DB_SIZE 500
@@ -743,7 +743,7 @@ void main()
     char stud_name[NAME_LEN];
     float stud_elo_rating;
     char goals[GOALS];
-    char slot[SLOT];
+    int slot;
     char style[STYLE];
     int assigned_train_id, stud_records;
     char performance[PERFORMANCE];
@@ -758,7 +758,7 @@ void main()
     char train_name[NAME_LEN];
     float train_elo_rating;
     char coach_style[STYLE];
-    char train_slot[SLOT];
+    int train_slot[SLOT];
     int experience;
     float qualify;
     int max, train_records, status3, status4;
@@ -810,7 +810,7 @@ void main()
         scanf("%s", train_name);
         scanf("%f", train_elo_rating);
         scanf("%s", coach_style);
-        scanf("%f", train_slot);
+        scanf("%s", train_slot);
         scanf("%d", experience);
         scanf("%f", qualify);
         scanf("%d", max);
@@ -895,7 +895,7 @@ void main()
 
     int count[train_records];
 
-    match_pairs(count, student_DB, trainer_DB, stud_records, train_records, assigned);
+    match_pairs(count, student_DB, trainer_DB, stud_records, train_records);
 
     float average[train_records];
     average_elo(trainer_DB, student_DB,  stud_records,  train_records, average);

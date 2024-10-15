@@ -671,6 +671,12 @@ void mergeSort_popularity(struct trainer_attribute trainer_DB[], struct trainer_
     }
 }
 
+void most_popular_trainer(struct trainer_attribute trainer_DB[], int train_records, int lo, int hi, float average[], int count[]){
+    struct trainer_attribute temp[train_records];
+    mergeSort_popularity(trainer_DB, temp, 0 , train_records-1, average, count);
+    printf("Most popular trainer: %c\nTrainer ID: %d", trainer_DB[0].trainer_name, trainer_DB[0].trainer_id);
+}
+
 void merge_self_strongest(struct trainer_attribute trainer_DB[], int l, int m, int n, struct trainer_attribute temp[], float average[])
 {
     int i, j, k;
@@ -889,14 +895,10 @@ void main()
 
     int count[train_records];
 
-    struct matched assigned[stud_records];
-
     match_pairs(count, student_DB, trainer_DB, stud_records, train_records, assigned);
 
     float average[train_records];
     average_elo(trainer_DB, student_DB,  stud_records,  train_records, average);
 
-    mergeSort_popularity(trainer_DB, temp, 0 , train_records-1, average, count);
-
-    printf("Most popular trainer: %c\n Trainer ID:\n", trainer_DB[0].trainer_name, trainer_DB[0].trainer_id);
+    most_popular_trainer(trainer_DB, train_records, 0, train_records-1, average, count);
 }

@@ -465,10 +465,10 @@ int successive_increase(struct student_attribute student_DB[], int stud_records,
     return cnt;
 }
 
-struct stud_count
+/*struct stud_count
 {
     int cnt;
-};
+};*/
 
 struct matched
 {
@@ -477,28 +477,61 @@ struct matched
     int train_id_matched;
 };
 
-void match_pairs(struct stud_count count[], struct student_attribute a[], struct trainer_attribute b[], int stud_records, int train_records, struct matched c[])
+void match_pairs(int count[], struct student_attribute a[], struct trainer_attribute b[], int stud_records, int train_records, struct matched c[])
 {
-    int flag = 0;
+    int flag1 = 0, flag2 = 0, flag3 = 0, flag4 = 0;
     for (int i = 0; i < train_records; i++)
     {
-        count[i].cnt = 0;
+        count[i] = 0;
     }
     for (int i = 0; i < stud_records; i++)
     {
-        for (int j = 0; j < train_records && flag == 0; j++)
+        for (int j = 0; j < train_records && flag1 == 0; j++)
         {
-            if (count[j].cnt <= b[j].max_students)
+            if (count[j] <= b[j].max_students)
             {
                 if (strcmp(a[i].time_slot, b[j].free_time_slot) == 0)
                 {
-                    if (strcmp(a[i].preferred_coaching_style, b[j].coaching_style) == 0 && a[i].student_elo_rating >= b[j].trainer_elo_rating)
+                    if (strcmp(a[i].preferred_coaching_style, b[j].coaching_style) == 0)
                     {
-                        flag = 1;
-                        count[j].cnt++;
-                        strcpy(c[i].student_name_matched, a[i].student_name);
-                        strcpy(c[i].trainer_name_matched, b[j].trainer_name);
-                        strcpy(c[i].train_id_matched, b[j].trainer_name);
+                        if (a[i].student_elo_rating >= b[j].trainer_elo_rating)
+                        {
+                            flag1 = 1;
+                            a[i].assigned_trainer_id = b[j].trainer_id;
+                            count[j]++;
+                            strcpy(c[i].student_name_matched, a[i].student_name);
+                            strcpy(c[i].trainer_name_matched, b[j].trainer_name);
+                            strcpy(c[i].train_id_matched, b[j].trainer_name);
+                        }
+
+                        else
+                        {
+                            if (flag2 == 0)
+                            {
+                                flag2 = 1;
+                                count[j]++;
+                                a[i].assigned_trainer_id = b[j].trainer_id;
+                                strcpy(c[i].student_name_matched, a[i].student_name);
+                                strcpy(c[i].trainer_name_matched, b[j].trainer_name);
+                                strcpy(c[i].train_id_matched, b[j].trainer_name);
+                            }
+                        }
+                    }
+
+                    else if (flag2 == 0)
+                    {
+                        if (flag3 == 0)
+                        {
+                            if (a[i].student_elo_rating >= b[j].trainer_elo_rating)
+                            {
+                                flag3 = 1;
+                                a[i].assigned_trainer_id = b[j].trainer_id;
+                                count[j]++;
+                                strcpy(c[i].student_name_matched, a[i].student_name);
+                                strcpy(c[i].trainer_name_matched, b[j].trainer_name);
+                                strcpy(c[i].train_id_matched, b[j].trainer_name);
+                            }
+                        }
                     }
                 }
             }
@@ -551,7 +584,6 @@ void main()
         scanf("%s", goals);
         scanf("%s", slot);
         scanf("%s", style);
-        scanf("%s", assigned_train_id);
         scanf("%s", performance);
         scanf("%s", &info.games_won);
         scanf("%s", &info.puzzles_solved);
@@ -663,4 +695,10 @@ void main()
     struct student_attribute temp2[stud_records];
 
     mergeSort_decreasing_gains(list, temp, 0, size_succesive - 1);
+
+    int count[train_records];
+
+    struct matched assigned[stud_records];
+
+    match_pairs(count, student_DB, trainer_DB, stud_records, train_records, assigned);
 }

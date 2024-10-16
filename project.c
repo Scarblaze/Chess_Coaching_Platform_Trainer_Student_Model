@@ -70,7 +70,7 @@ void Initialize_student_DB(struct student_attribute students[], int size)
     for (int i = 0; i < size; i++)
     {
         students[i].student_name[0] = '\0';
-        students[i].student_elo_rating = 0;
+        students[i].student_elo_rating = 0.0;
         students[i].learn_goals[0] = '\0';
         for (int j = 0; j < SLOT; j++)
         {
@@ -122,6 +122,7 @@ int insert_update_trainer(struct trainer_attribute trainer_DB[], int size, int t
         {
             trainer_DB[i].free_time_slot[k] = slot[k];
         }
+
         trainer_DB[i].experience_level = experience;
         trainer_DB[i].qualify_elo = qualify;
         trainer_DB[i].max_students = max;
@@ -131,7 +132,7 @@ int insert_update_trainer(struct trainer_attribute trainer_DB[], int size, int t
         j = 0, free_loc = 0;
         while (j < size && free_loc == 0)
         {
-            if (trainer_DB[j].trainer_name == '\0' && trainer_DB[j].trainer_id == 0)
+            if (trainer_DB[j].trainer_id == 0)
             {
                 free_loc = 1;
             }
@@ -191,10 +192,23 @@ int insert_update_student(struct student_attribute student_DB[], int size, char 
 
     if (found)
     {
-        // strcpy(student_DB[i].student_name, stud_name);
-        // student_DB[i].student_elo_rating = stud_elo_rating;
+        strcpy(student_DB[i].learn_goals, goals);
+        for (int k = 0; k < SLOT; k++)
+        {
+            student_DB[i].time_slot[k] = slot[k];
+        }
+        strcpy(student_DB[i].preferred_coaching_style, style);
 
-        // Check once!
+        // Check once assigned trainer id!
+
+        student_DB[i].assigned_trainer_id = assigned_train_id;
+        strcpy(student_DB[i].performance_data, performance);
+        student_DB[i].data.games_won = info.games_won;
+        student_DB[i].data.puzzles_solved = info.puzzles_solved;
+        for (int k = 0; k < 12; k++)
+        {
+            student_DB[i].data.ratings[k] = info.ratings[k];
+        }
     }
     else
     {
@@ -220,8 +234,10 @@ int insert_update_student(struct student_attribute student_DB[], int size, char 
             strcpy(student_DB[j].learn_goals, goals);
             for (int k = 0; k < SLOT; k++)
             {
-                student_DB[i].time_slot[k] = slot[k];
+                student_DB[j].time_slot[k] = slot[k];
             }
+
+            // Check once assigned trainer_id
             strcpy(student_DB[j].preferred_coaching_style, style);
             student_DB[j].assigned_trainer_id = assigned_train_id;
             strcpy(student_DB[j].performance_data, performance);
@@ -326,12 +342,12 @@ int delete_trainer_record(struct trainer_attribute trainer_DB[], int size, char 
 
 void sort_students_elo_rating(struct student_attribute student_DB[], struct student_attribute temp[], int size)
 {
-    merge_sort(student_DB, temp, 0, size - 1);
+    merge_sort_stud_elo(student_DB, temp, 0, size - 1);
 }
 
 // Merge Sort Function for student_Database
 
-void merge_self(struct student_attribute student_DB[], struct student_attribute temp[], int low, int mid, int high)
+void merge_self_stud_elo(struct student_attribute student_DB[], struct student_attribute temp[], int low, int mid, int high)
 {
     int i, j, k;
     i = low, j = mid + 1, k = low;
@@ -391,15 +407,15 @@ void merge_self(struct student_attribute student_DB[], struct student_attribute 
     }
 }
 
-void merge_sort(struct student_attribute student_DB[], struct student_attribute temp[], int low, int high)
+void merge_sort_stud_elo(struct student_attribute student_DB[], struct student_attribute temp[], int low, int high)
 {
     int mid;
     if (low < high)
     {
         mid = low + (high - low) / 2;
-        merge_sort(student_DB, temp, low, mid);
-        merge_sort(student_DB, temp, mid + 1, high);
-        merge_self(student_DB, temp, low, mid, high);
+        merge_sort_stud_elo(student_DB, temp, low, mid);
+        merge_sort_stud_elo(student_DB, temp, mid + 1, high);
+        merge_self_stud_elo(student_DB, temp, low, mid, high);
     }
 }
 
@@ -462,9 +478,10 @@ int successive_increase(struct student_attribute student_DB[], int stud_records,
 
     int cnt = 0;
     int flag = 0;
+    int m = 0;
     for (int i = 0; i < stud_records; i++)
     {
-        for (int j = 1; j < 12 && flag == 0; i++)
+        for (int j = 1; j < 12 && flag == 0; j++)
         {
             if (student_DB[i].data.ratings[j] < student_DB[i].data.ratings[j - 1])
             {
@@ -474,37 +491,29 @@ int successive_increase(struct student_attribute student_DB[], int stud_records,
         if (flag == 0)
         {
             cnt++;
-            strcpy(list[i].student_name, student_DB[i].student_name);
-            student_DB[i].student_elo_rating = list[i].student_elo_rating;
-            strcpy(list[i].learn_goals, student_DB[i].learn_goals);
-            for (int k = 0; k < SLOT; k++)
-            {
-                list[i].time_slot[k] = student_DB[i].time_slot[k];
+
+            // Check This !
+
+            list[m] = student_DB[i];
+            m++;
+
+            /*strcpy(list[m].student_name, student_DB[i].student_name);
+            list[m].student_elo_rating = student_DB[i].student_elo_rating;
+            strcpy(list[m].learn_goals, student_DB[i].learn_goals);
+            for(int k=0; k<SLOT; k++){
+                list[m].time_slot[k]=student_DB[i].time_slot[k];
             }
-            strcpy(list[i].preferred_coaching_style, student_DB[i].preferred_coaching_style);
-            student_DB[i].assigned_trainer_id = list[i].assigned_trainer_id;
-            strcpy(list[i].performance_data, student_DB[i].performance_data);
+            strcpy(list[m].preferred_coaching_style, student_DB[i].preferred_coaching_style);
+            list[m].assigned_trainer_id = student_DB[i].assigned_trainer_id;
+            strcpy(list[m].performance_data, student_DB[i].performance_data);*/
         }
     }
     return cnt;
 }
 
-/*struct stud_count
-{
-    int cnt;
-};*/
-
-// struct matched
-// {
-//     char student_name_matched[NAME_LEN];
-//     char trainer_name_matched[NAME_LEN];
-//     int train_id_matched;
-//     float student_elo;
-// };
-
 void match_pairs(int count[], struct student_attribute a[], struct trainer_attribute b[], int stud_records, int train_records)
 {
-    int flag1 = 0, flag2 = 0, flag3 = 0, flag4 = 0;
+    int flag1 = 0, flag2 = 0, flag3 = 0, flag4 = 0, found = 0;
     for (int i = 0; i < train_records; i++)
     {
         count[i] = 0;
@@ -515,7 +524,17 @@ void match_pairs(int count[], struct student_attribute a[], struct trainer_attri
         {
             if (count[j] <= b[j].max_students)
             {
-                if (strcmp(a[i].time_slot, b[j].free_time_slot) == 0)
+                for (int k = 0; k < SLOT && found == 0; k++)
+                {
+                    for (int m = 0; m < SLOT && found == 0; m++)
+                    {
+                        if (a[i].time_slot[k] == b[j].free_time_slot[m])
+                        {
+                            found = 1;
+                        }
+                    }
+                }
+                if (found)
                 {
                     if (strcmp(a[i].preferred_coaching_style, b[j].coaching_style) == 0)
                     {
@@ -567,64 +586,6 @@ void match_pairs(int count[], struct student_attribute a[], struct trainer_attri
     }
 }
 
-// float average_elo_rating(struct matched a[], int train_id, int stud_records){
-//     float sum = 0;
-//     int cnt=0;
-//     for(int i=0; i<stud_records; i++) {
-//         if(a[i].train_id_matched==train_id){
-//             sum = sum + a[i].student_elo;
-//             cnt++;
-//         }
-//     }
-//     return sum/(float)cnt;
-// }
-
-// void most_popular_trainer(int stud_records, int train_records, struct student_attribute student_DB[], struct trainer_attribute trainer_DB[])
-// {
-//     int cnt = 0;
-//     int loc = 0;
-//     int max = 0;
-//     float max_avg = 0;
-//     float avg;
-//     float sum = 0;
-//     int cnt2 = 0;
-
-//     for (int i = 0; i < train_records; i++)
-//     {
-//         for (int j = 0; j < stud_records; j++)
-//         {
-//             if (trainer_DB[i].trainer_id == student_DB[j].assigned_trainer_id)
-//             {
-//                 cnt++;
-//             }
-//         }
-
-//         if (cnt > max)
-//         {
-//             max = cnt;
-//             loc = i;
-//         }
-//         else if (cnt == max)
-//         {
-//             max = cnt;
-//             for (int k = 0; k < stud_records; k++)
-//             {
-//                 if (student_DB[k].assigned_trainer_id == trainer_DB[i].trainer_id)
-//                 {
-//                     sum = sum + student_DB[k].student_elo_rating;
-//                     cnt++;
-//                 }
-//             }
-//             avg = sum / (float)cnt;
-//             if (avg > max_avg)
-//             {
-//                 max_avg = avg;
-//                 loc = i;
-//             }
-//         }
-//     }
-//     printf("most popular trainer name: %c\n trainer ID: %d\n", trainer_DB[loc].trainer_name, trainer_DB[loc].trainer_id);
-// }
 
 void average_elo(struct trainer_attribute trainer_DB[], struct student_attribute student_DB[], int stud_records, int train_records, float average[])
 {
@@ -695,7 +656,7 @@ void mergeSort_popularity(struct trainer_attribute trainer_DB[], struct trainer_
     int mid;
     if (lo < hi)
     {
-        mid = (lo + hi) / 2;
+        mid = lo + (hi - lo) / 2;
         mergeSort_popularity(trainer_DB, temp, lo, mid, average, count);
         mergeSort_popularity(trainer_DB, temp, mid + 1, hi, average, count);
         merge_self_popularity(trainer_DB, lo, mid, hi, temp, average, count);
@@ -706,64 +667,7 @@ void most_popular_trainer(struct trainer_attribute trainer_DB[], int train_recor
 {
     struct trainer_attribute temp[train_records];
     mergeSort_popularity(trainer_DB, temp, 0, train_records - 1, average, count);
-    printf("Most popular trainer: %c\nTrainer ID: %d", trainer_DB[0].trainer_name, trainer_DB[0].trainer_id);
-}
-
-void merge_self_strongest(struct trainer_attribute trainer_DB[], int l, int m, int n, struct trainer_attribute temp[], float average[])
-{
-    int i, j, k;
-    i = l;
-    j = m + 1;
-    k = l;
-    while ((i <= m) && (j <= n))
-    {
-        if (average[i] >= average[j])
-        {
-            temp[k++] = trainer_DB[i++];
-        }
-        else
-        {
-            temp[k++] = trainer_DB[j++];
-        }
-    }
-
-    if (i <= m)
-    {
-        while (i <= m)
-        {
-            temp[k++] = trainer_DB[i++];
-        }
-    }
-    else
-    {
-        while (j <= n)
-        {
-            temp[k++] = trainer_DB[j++];
-        }
-    }
-
-    for (i = l; i <= n; i++)
-    {
-        trainer_DB[i] = temp[i];
-    }
-}
-
-void mergeSort_strongest(struct trainer_attribute trainer_DB[], struct trainer_attribute temp[], int lo, int hi, float average[])
-{
-    int mid;
-    if (lo < hi)
-    {
-        mid = lo + (hi - lo) / 2;
-        mergeSort_strongest(trainer_DB, temp, lo, mid, average);
-        mergeSort_strongest(trainer_DB, temp, mid + 1, hi, average);
-        merge_self_strongest(trainer_DB, lo, mid, hi, temp, average);
-    }
-}
-
-void strongest_trainer(struct trainer_attribute trainer_DB[], float avg_elo[], int train_records)
-{
-    struct trainer_attribute temp[train_records];
-    mergeSort_strongest(trainer_DB, temp, 0, train_records - 1, avg_elo);
+    printf("Most popular trainer: %s\nTrainer ID: %d", trainer_DB[0].trainer_name, trainer_DB[0].trainer_id);
 }
 
 void main()
@@ -773,7 +677,7 @@ void main()
     char stud_name[NAME_LEN];
     float stud_elo_rating;
     char goals[GOALS];
-    int stud_slot[SLOT];
+    int slot[SLOT];
     char style[STYLE];
     int assigned_train_id, stud_records;
     char performance[PERFORMANCE];
@@ -809,17 +713,18 @@ void main()
         scanf("%s", stud_name);
         scanf("%f", &stud_elo_rating);
         scanf("%s", goals);
-        for (int i = 0; i < SLOT; i++)
+        for (int k = 0; k < SLOT; k++)
         {
-            scanf("%d ", &stud_slot[i]);
+            scanf("%d", &slot[k]);
         }
+
         scanf("%s", style);
         scanf("%s", performance);
-        scanf("%s", &info.games_won);
-        scanf("%s", &info.puzzles_solved);
+        scanf("%d", &info.games_won);
+        scanf("%d", &info.puzzles_solved);
         for (int j = 0; j < 12; j++)
         {
-            scanf("%s", &info.ratings[j]);
+            scanf("%d", &info.ratings[j]);
         }
 
         status1 = insert_update_student(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating, goals, slot, style, assigned_train_id, performance, info);
@@ -843,9 +748,9 @@ void main()
         scanf("%s", train_name);
         scanf("%f", train_elo_rating);
         scanf("%s", coach_style);
-        for (int i = 0; i < SLOT; i++)
+        for (int k = 0; k < SLOT; k++)
         {
-            scanf("%d ", &train_slot[i]);
+            scanf("%d", train_slot[k]);
         }
         scanf("%d", experience);
         scanf("%f", qualify);
@@ -915,7 +820,7 @@ void main()
     // Function call to sort student based on elo_rating.
 
     struct student_attribute temp1[stud_records];
-    sort_students_elo_rating(student_DB, stud_records);
+    sort_students_elo_rating(student_DB, temp1, stud_records);
 
     // answer to question 12
 
@@ -927,7 +832,7 @@ void main()
 
     struct student_attribute temp2[stud_records];
 
-    mergeSort_decreasing_gains(list, temp, 0, size_succesive - 1);
+    mergeSort_decreasing_gains(list, temp2, 0, size_succesive);
 
     int count[train_records];
 
@@ -936,5 +841,9 @@ void main()
     float average[train_records];
     average_elo(trainer_DB, student_DB, stud_records, train_records, average);
 
+    struct trainer_attribute temp3[train_records];
+
+    mergeSort_popularity(trainer_DB, temp3, 0, train_records - 1, average, count);
+
     most_popular_trainer(trainer_DB, train_records, 0, train_records - 1, average, count);
-}
+};

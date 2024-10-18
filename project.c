@@ -329,70 +329,44 @@ int delete_trainer_record(struct trainer_attribute trainer_DB[], int size, int t
 
 // Function to sort students based on elo_rating
 
-void sort_students_elo_rating(struct student_attribute student_DB[], struct student_attribute temp[], int size)
-{
-    merge_sort_stud_elo(student_DB, temp, 0, size - 1);
-}
+void merge_self_stud_elo(struct student_attribute student_DB[], struct student_attribute temp[], int low, int mid, int high) {
+    int i = low, j = mid + 1, k = low;
 
-// Merge Sort Function for student_Database
-
-void merge_self_stud_elo(struct student_attribute student_DB[], struct student_attribute temp[], int low, int mid, int high)
-{
-    int i, j, k;
-    i = low, j = mid + 1, k = low;
-    while (i <= mid && j <= high)
-    {
-        if (student_DB[i].student_elo_rating == student_DB[j].student_elo_rating)
-        {
-            if (student_DB[i].data.games_won > student_DB[j].data.games_won)
-            {
-                temp[k] = student_DB[i];
-                k++;
-                i++;
-            }
-            else
-            {
-                temp[k] = student_DB[j];
-                j++;
-                k++;
-            }
-        }
-        else
-        {
-            if (student_DB[i].student_elo_rating > student_DB[j].student_elo_rating)
-            {
+    while (i <= mid && j <= high) {
+        if (student_DB[i].student_elo_rating == student_DB[j].student_elo_rating) {
+            if (student_DB[i].data.games_won > student_DB[j].data.games_won) {
                 temp[k] = student_DB[i];
                 i++;
-                k++;
-            }
-            else
-            {
+            } else {
                 temp[k] = student_DB[j];
                 j++;
-                k++;
+            }
+        } else {
+            if (student_DB[i].student_elo_rating > student_DB[j].student_elo_rating) {
+                temp[k] = student_DB[i];
+                i++;
+            } else {
+                temp[k] = student_DB[j];
+                j++;
             }
         }
+        k++;
+    }
 
-        while (i <= mid)
-        {
-            temp[k] = student_DB[i];
-            i++;
-            k++;
-        }
+    while (i <= mid) {
+        temp[k] = student_DB[i];
+        i++;
+        k++;
+    }
 
-        while (j <= high)
-        {
-            temp[k] = student_DB[j];
-            j++;
-            k++;
-        }
+    while (j <= high) {
+        temp[k] = student_DB[j];
+        j++;
+        k++;
+    }
 
-        i = low;
-        while (i <= high)
-        {
-            student_DB[i] = temp[i];
-            i++;
-        }
+    for (i = low; i <= high; i++) {
+        student_DB[i] = temp[i];
     }
 }
 
@@ -406,6 +380,11 @@ void merge_sort_stud_elo(struct student_attribute student_DB[], struct student_a
         merge_sort_stud_elo(student_DB, temp, mid + 1, high);
         merge_self_stud_elo(student_DB, temp, low, mid, high);
     }
+}
+
+void sort_students_elo_rating(struct student_attribute student_DB[], struct student_attribute temp[], int size)
+{
+    merge_sort_stud_elo(student_DB, temp, 0, size - 1);
 }
 
 // Students Sort function for decreasing gains

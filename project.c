@@ -688,7 +688,7 @@ void print_stud(struct student_attribute s[], int size)
         printf("Puzzles Solved :%d\n",s[i].data.puzzles_solved);
         for(int k=0; k<12;k++)
         {
-            printf("Ratings %d: %d",i+1,s[i].data.ratings[k]);
+            printf("Ratings %d: %d",k+1,s[i].data.ratings[k]);
         }
         printf("\n");
     }

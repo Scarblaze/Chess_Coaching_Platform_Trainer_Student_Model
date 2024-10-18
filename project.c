@@ -673,22 +673,26 @@ void print_stud(struct student_attribute s[], int size)
 {
     for(int i=0; i<size; i++)
     {
-        printf("Name: %s\n", s[i].student_name);
-        printf("ELO: %f\n",s[i].student_elo_rating);
-        printf("Learning Goals: %s\n",s[i].learn_goals);
-        for (int j = 0; j < SLOT; j++)
+        if(s[i].student_name[0] != '\0' && s[i].student_elo_rating != 0)
         {
-            printf("Slot %d: %d\n",j+1,s[i].time_slot[j]);
+            printf("Name: %s\n", s[i].student_name);
+            printf("ELO: %f\n",s[i].student_elo_rating);
+            printf("Learning Goals: %s\n",s[i].learn_goals);
+            for (int j = 0; j < SLOT; j++)
+            {
+                printf("Slot %d: %d\n",j+1,s[i].time_slot[j]);
+            }
+            printf("style: %s\n",s[i].preferred_coaching_style);
+            printf("trainer_id: %d\n",s[i].assigned_trainer_id);
+            printf("performance: %s\n",s[i].performance_data);
+            printf("Games Won: %d\n",s[i].data.games_won);
+            printf("Puzzles Solved :%d\n",s[i].data.puzzles_solved);
+            for(int k=0; k<12;k++)
+            {
+                printf("Ratings %d: %d\n",k+1,s[i].data.ratings[k]);
+            }
         }
-        printf("style: %s\n",s[i].preferred_coaching_style);
-        printf("trainer_id: %d\n",s[i].assigned_trainer_id);
-        printf("performance: %s\n",s[i].performance_data);
-        printf("Games Won: %d\n",s[i].data.games_won);
-        printf("Puzzles Solved :%d\n",s[i].data.puzzles_solved);
-        for(int k=0; k<12;k++)
-        {
-            printf("Ratings %d: %d\n",k+1,s[i].data.ratings[k]);
-        }
+        
     }
 }
 

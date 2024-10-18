@@ -215,7 +215,7 @@ int insert_update_student(struct student_attribute student_DB[], int size, char 
         j = 0, free_loc = 0;
         while (j < size && free_loc == 0)
         {
-            if (student_DB[j].student_name == '\0' && student_DB[j].student_elo_rating == 0)
+            if (student_DB[j].student_name[0] == '\0' && student_DB[j].student_elo_rating == 0)
             {
                 free_loc = 1;
             }
@@ -255,7 +255,6 @@ int insert_update_student(struct student_attribute student_DB[], int size, char 
     }
     return status;
 }
-
 // Deleting student record function
 
 int delete_student_record(struct student_attribute student_DB[], int size, char stud_name[], float stud_elo_rating)
@@ -670,6 +669,31 @@ void most_popular_trainer(struct trainer_attribute trainer_DB[], int train_recor
     printf("Most popular trainer: %s\nTrainer ID: %d", trainer_DB[0].trainer_name, trainer_DB[0].trainer_id);
 }
 
+void print_stud(struct student_attribute s[], int size)
+{
+    for(int i=0; i<size; i++)
+    {
+        printf("Name: %s\n", s[i].student_name);
+        printf("ELO: %f\n",s[i].student_elo_rating);
+        printf("Learning Goals: %s\n",s[i].learn_goals);
+        for (int j = 0; j < SLOT; j++)
+        {
+            printf("Slot %d: %d",j+1,s[i].time_slot[j]);
+        }
+        printf("\n");
+        printf("style: %s\n",s[i].preferred_coaching_style);
+        printf("trainer_id: %d\n",s[i].assigned_trainer_id);
+        printf("performance: %s\n",s[i].performance_data);
+        printf("Games Won: %d\n",s[i].data.games_won);
+        printf("Puzzles Solved :%d\n",s[i].data.puzzles_solved);
+        for(int k=0; k<12;k++)
+        {
+            printf("Ratings %d: %d",i+1,s[i].data.ratings[k]);
+        }
+        printf("\n");
+    }
+}
+
 void main()
 {
     // student info variables
@@ -708,22 +732,30 @@ void main()
     printf("How many student records you want to enter: ");
     scanf("%d", &stud_records);
 
-    for (int i = 0; i < stud_records; i++)
+   for (int i = 0; i < stud_records; i++)
     {
+        printf("Name: ");
         scanf("%s", stud_name);
+        printf("ELO: ");
         scanf("%f", &stud_elo_rating);
+        printf("Goals:");
         scanf("%s", goals);
         for (int k = 0; k < SLOT; k++)
         {
+            printf("slot %d: ",k+1);
             scanf("%d", &slot[k]);
         }
-
+        printf("style: ");
         scanf("%s", style);
+        printf("performance: ");
         scanf("%s", performance);
+        printf("Games Won: ");
         scanf("%d", &info.games_won);
+        printf("Puzzles Solved: ");
         scanf("%d", &info.puzzles_solved);
         for (int j = 0; j < 12; j++)
         {
+            printf("Month %d: ",j+1);
             scanf("%d", &info.ratings[j]);
         }
 

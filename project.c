@@ -62,7 +62,6 @@ void Initialize_trainer_DB(struct trainer_attribute trainers[], int size_trainer
         trainers[i].max_students = 0;
     }
 }
-
 // Function to Initialize the student DB
 
 void Initialize_student_DB(struct student_attribute students[], int size)
@@ -95,9 +94,6 @@ void Initialize_student_DB(struct student_attribute students[], int size)
 
 int insert_update_trainer(struct trainer_attribute trainer_DB[], int size, int train_id, char train_name[], float train_elo_rating, char coach_style[], int slot[], int experience, float qualify, int max)
 {
-
-    // Check if corresponding data exists for trainer
-
     int status = SUCCESS;
     int i = 0, j, found = 0, free_loc;
     while (i < size && !found)
@@ -112,8 +108,6 @@ int insert_update_trainer(struct trainer_attribute trainer_DB[], int size, int t
         }
     }
 
-    // Update trainer data
-
     if (found)
     {
         trainer_DB[i].trainer_elo_rating = train_elo_rating;
@@ -122,7 +116,6 @@ int insert_update_trainer(struct trainer_attribute trainer_DB[], int size, int t
         {
             trainer_DB[i].free_time_slot[k] = slot[k];
         }
-
         trainer_DB[i].experience_level = experience;
         trainer_DB[i].qualify_elo = qualify;
         trainer_DB[i].max_students = max;
@@ -142,23 +135,20 @@ int insert_update_trainer(struct trainer_attribute trainer_DB[], int size, int t
             }
         }
 
-        // If free location found insert the trainer data
-
         if (free_loc)
         {
-            trainer_DB[i].trainer_id = train_id;
-            strcpy(trainer_DB[i].trainer_name, train_name);
-            trainer_DB[i].trainer_elo_rating = train_elo_rating;
-            strcpy(trainer_DB[i].coaching_style, coach_style);
+            trainer_DB[j].trainer_id = train_id;
+            strcpy(trainer_DB[j].trainer_name, train_name);
+            trainer_DB[j].trainer_elo_rating = train_elo_rating;
+            strcpy(trainer_DB[j].coaching_style, coach_style);
             for (int k = 0; k < SLOT; k++)
             {
-                trainer_DB[i].free_time_slot[k] = slot[k];
+                trainer_DB[j].free_time_slot[k] = slot[k];
             }
-            trainer_DB[i].experience_level = experience;
-            trainer_DB[i].qualify_elo = qualify;
-            trainer_DB[i].max_students = max;
+            trainer_DB[j].experience_level = experience;
+            trainer_DB[j].qualify_elo = qualify;
+            trainer_DB[j].max_students = max;
         }
-
         else
         {
             status = FAILURE;
@@ -300,7 +290,7 @@ int delete_student_record(struct student_attribute student_DB[], int size, char 
 
 // Delete trainer record
 
-int delete_trainer_record(struct trainer_attribute trainer_DB[], int size, char train_name[], int train_id)
+int delete_trainer_record(struct trainer_attribute trainer_DB[], int size, int train_id)
 {
     int status = SUCCESS;
     int i = 0, found = 0;
@@ -696,6 +686,30 @@ void print_stud(struct student_attribute s[], int size)
     }
 }
 
+void print_trainers(struct trainer_attribute t[], int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        if (t[i].trainer_id != 0) 
+        {
+            printf("ID: %d\n", t[i].trainer_id);
+            printf("Name: %s\n", t[i].trainer_name);
+            printf("ELO Rating: %f\n", t[i].trainer_elo_rating);
+            printf("Style: %s\n", t[i].coaching_style);
+            printf("Free time slots: ");
+            for (int j = 0; j < SLOT; j++)
+            {
+                printf("%d ", t[i].free_time_slot[j]);
+            }
+            printf("\n");
+            printf("Experience: %d\n", t[i].experience_level);
+            printf("Qualifying Elo: %f\n", t[i].qualify_elo);
+            printf("Max students: %d\n", t[i].max_students);
+            printf("\n");
+        }
+    }
+}
+
 void main()
 {
     // student info variables
@@ -778,17 +792,25 @@ void main()
 
     for (int i = 0; i < train_records; i++)
     {
-        scanf("%d", train_id);
+        printf("ID: ");
+        scanf("%d", &train_id);
+        printf("Name: ");
         scanf("%s", train_name);
-        scanf("%f", train_elo_rating);
+        printf("ELO: ");
+        scanf("%f", &train_elo_rating);
+        printf("Style: ");
         scanf("%s", coach_style);
+        printf("Slots: ");
         for (int k = 0; k < SLOT; k++)
         {
-            scanf("%d", train_slot[k]);
+            scanf("%d", &train_slot[k]);
         }
-        scanf("%d", experience);
-        scanf("%f", qualify);
-        scanf("%d", max);
+        printf("Experience: ");
+        scanf("%d", &experience);
+        printf("Qualify elo: ");
+        scanf("%f", &qualify);
+        printf("Max Students: ");
+        scanf("%d", &max);
 
         status3 = insert_update_trainer(trainer_DB, TRAIN_DB_SIZE, train_id, train_name, train_elo_rating, coach_style, train_slot, experience, qualify, max);
 
@@ -827,17 +849,15 @@ void main()
 
     // To delete a trainer record
     int temp;
-    printf("Do you want to delete a trainer record?: enter 1 for yes and 0 for No ");
+    printf("Do you want to delete a trainer record? Enter 1 for yes and 0 for no: ");
     scanf("%d", &temp);
 
     if (temp)
     {
-        printf("Enter trainer name to be deleted: ");
-        scanf("%s", &train_name);
-        printf("enter trainer ID: ");
-        scanf("%d", train_id);
+        printf("Enter trainer ID to be deleted: ");
+        scanf("%d", &train_id);
 
-        status4 = delete_trainer_record(trainer_DB, train_records, train_name, train_id);
+        status4 = delete_trainer_record(trainer_DB, TRAIN_DB_SIZE, train_id);
 
         if (status4)
         {
@@ -848,7 +868,6 @@ void main()
             printf("No trainer record found\n");
         }
     }
-
     // Ensure that stud_records is updated accoring to insert and delete functions.
 
     // Function call to sort student based on elo_rating.

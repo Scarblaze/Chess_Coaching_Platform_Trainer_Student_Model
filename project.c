@@ -678,9 +678,8 @@ void print_stud(struct student_attribute s[], int size)
         printf("Learning Goals: %s\n",s[i].learn_goals);
         for (int j = 0; j < SLOT; j++)
         {
-            printf("Slot %d: %d",j+1,s[i].time_slot[j]);
+            printf("Slot %d: %d\n",j+1,s[i].time_slot[j]);
         }
-        printf("\n");
         printf("style: %s\n",s[i].preferred_coaching_style);
         printf("trainer_id: %d\n",s[i].assigned_trainer_id);
         printf("performance: %s\n",s[i].performance_data);
@@ -688,9 +687,8 @@ void print_stud(struct student_attribute s[], int size)
         printf("Puzzles Solved :%d\n",s[i].data.puzzles_solved);
         for(int k=0; k<12;k++)
         {
-            printf("Ratings %d: %d",k+1,s[i].data.ratings[k]);
+            printf("Ratings %d: %d\n",k+1,s[i].data.ratings[k]);
         }
-        printf("\n");
     }
 }
 

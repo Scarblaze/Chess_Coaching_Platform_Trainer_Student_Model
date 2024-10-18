@@ -412,12 +412,9 @@ void merge_sort_stud_elo(struct student_attribute student_DB[], struct student_a
 
 void mergeSelf_decreasing_gains(struct student_attribute student_DB[], int l, int m, int n, struct student_attribute temp[])
 {
-    int i, j, k;
-    i = l;
-    j = m + 1;
-    k = l;
+    int i = l, j = m + 1, k = l;
 
-    while ((i <= m) && (j <= n))
+    while (i <= m && j <= n)
     {
         if ((student_DB[i].data.ratings[11] - student_DB[i].data.ratings[0]) > (student_DB[j].data.ratings[11] - student_DB[j].data.ratings[0]))
         {
@@ -429,19 +426,14 @@ void mergeSelf_decreasing_gains(struct student_attribute student_DB[], int l, in
         }
     }
 
-    if (i <= m)
+    while (i <= m)
     {
-        while (i <= m)
-        {
-            temp[k++] = student_DB[i++];
-        }
+        temp[k++] = student_DB[i++];
     }
-    else
+
+    while (j <= n)
     {
-        while (j <= n)
-        {
-            temp[k++] = student_DB[j++];
-        }
+        temp[k++] = student_DB[j++];
     }
 
     for (i = l; i <= n; i++)
@@ -449,13 +441,11 @@ void mergeSelf_decreasing_gains(struct student_attribute student_DB[], int l, in
         student_DB[i] = temp[i];
     }
 }
-
 void mergeSort_decreasing_gains(struct student_attribute student_DB[], struct student_attribute temp[], int lo, int hi)
 {
-    int mid;
     if (lo < hi)
     {
-        mid = (lo + hi) / 2;
+        int mid = (lo + hi) / 2;
         mergeSort_decreasing_gains(student_DB, temp, lo, mid);
         mergeSort_decreasing_gains(student_DB, temp, mid + 1, hi);
         mergeSelf_decreasing_gains(student_DB, lo, mid, hi, temp);
@@ -464,37 +454,22 @@ void mergeSort_decreasing_gains(struct student_attribute student_DB[], struct st
 
 int successive_increase(struct student_attribute student_DB[], int stud_records, struct student_attribute list[])
 {
-
     int cnt = 0;
-    int flag = 0;
-    int m = 0;
+    int m=0;
     for (int i = 0; i < stud_records; i++)
     {
-        for (int j = 1; j < 12 && flag == 0; j++)
+        int flag = 0;
+        for (int j = 1; j < 12&&flag==0; j++)
         {
             if (student_DB[i].data.ratings[j] < student_DB[i].data.ratings[j - 1])
             {
-                flag = 1;
+                flag = 1; 
             }
         }
-        if (flag == 0)
+        if (!flag)
         {
             cnt++;
-
-            // Check This !
-
-            list[m] = student_DB[i];
-            m++;
-
-            /*strcpy(list[m].student_name, student_DB[i].student_name);
-            list[m].student_elo_rating = student_DB[i].student_elo_rating;
-            strcpy(list[m].learn_goals, student_DB[i].learn_goals);
-            for(int k=0; k<SLOT; k++){
-                list[m].time_slot[k]=student_DB[i].time_slot[k];
-            }
-            strcpy(list[m].preferred_coaching_style, student_DB[i].preferred_coaching_style);
-            list[m].assigned_trainer_id = student_DB[i].assigned_trainer_id;
-            strcpy(list[m].performance_data, student_DB[i].performance_data);*/
+            list[m++] = student_DB[i];
         }
     }
     return cnt;
@@ -885,7 +860,8 @@ void main()
 
     struct student_attribute temp2[stud_records];
 
-    mergeSort_decreasing_gains(list, temp2, 0, size_succesive);
+    mergeSort_decreasing_gains(list, temp2, 0, size_succesive-1);
+    //print_stud(list, size_succesive);
 
     int count[train_records];
 

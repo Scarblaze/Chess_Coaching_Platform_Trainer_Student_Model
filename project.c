@@ -680,10 +680,7 @@ void main()
 
     int user_input;
 
-    printf("Functions to perform: \n");
-    printf("1. Insert or Update a Student \n 2. Insert or Update a Trainer \n 3. Delete a student \n 4. Delete a Trainer \n 5.List of students a trainer is teaching \n 6. Display students based on decreasing ELO Rating \n 7. Display most popular trainer \n 8. Display strongest Trainer \n 9. Assign Trainer based on matching criteria \n 10. Display students with decreasing ELO Rating gains \n");
-    printf("Enter the function number you want to perform: ");
-    scanf("%d",&user_input);
+    int exit = 0;
 
     int count[TRAIN_DB_SIZE];
     float average[TRAIN_DB_SIZE];
@@ -691,158 +688,180 @@ void main()
     struct student_attribute list[STUD_DB_SIZE];
 
     Initialize_student_DB(list, stud_records);
-
-    switch(user_input)
+    do
     {
-        case 1:
-            printf("How many student records you want to enter: ");
-            scanf("%d", &stud_records);
+        printf("Functions to perform: \n");
+        printf("1.Insert or Update a Student \n 2. Insert or Update a Trainer \n 3. Delete a student \n 4. Delete a Trainer \n 5.List of students a trainer is teaching \n 6. Display students based on decreasing ELO Rating \n 7. Display most popular trainer \n 8. Display strongest Trainer \n 9. Assign Trainer based on matching criteria \n 10. Display students with decreasing ELO Rating gains \n 11. Display Student Database \n 12. Display Trainer Database \n 13. Exit \n");
+        printf("Enter the function number you want to perform: ");
+        scanf("%d",&user_input);
+        switch(user_input)
+        {
+            case 1:
+                printf("How many student records you want to enter: ");
+                scanf("%d", &stud_records);
 
-            for (int i = 0; i < stud_records; i++)
-            {
-                printf("Name: ");
-                scanf("%s", stud_name);
-                printf("ELO: ");
+                for (int i = 0; i < stud_records; i++)
+                {
+                    printf("Name: ");
+                    scanf("%s", stud_name);
+                    printf("ELO: ");
+                    scanf("%f", &stud_elo_rating);
+                    printf("Goals:");
+                    scanf("%s", goals);
+                    for (int k = 0; k < SLOT; k++)
+                    {
+                        printf("slot %d: ",k+1);
+                        scanf("%d", &slot[k]);
+                    }
+                    printf("style: ");
+                    scanf("%s", style);
+                    printf("performance: ");
+                    scanf("%s", performance);
+                    printf("Games Won: ");
+                    scanf("%d", &info.games_won);
+                    printf("Puzzles Solved: ");
+                    scanf("%d", &info.puzzles_solved);
+                    for (int j = 0; j < 12; j++)
+                    {
+                        printf("Month %d: ",j+1);
+                        scanf("%d", &info.ratings[j]);
+                    }
+
+                    status1 = insert_update_student(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating, goals, slot, style, assigned_train_id, performance, info);
+
+                    if (!status1)
+                    {
+                        printf("Database overload! Come next time\n");
+                    }
+                    else
+                    {
+                        printf("Student data updated successfully\n");
+                    }
+                }
+
+                break;
+
+            case 2: 
+                printf("How many trainer records do you want to enter? ");
+                scanf("%d", &train_records);
+
+                for (int i = 0; i < train_records; i++)
+                {
+                    printf("ID: ");
+                    scanf("%d", &train_id);
+                    printf("Name: ");
+                    scanf("%s", train_name);
+                    printf("ELO: ");
+                    scanf("%f", &train_elo_rating);
+                    printf("Style: ");
+                    scanf("%s", coach_style);
+                    printf("Slots: ");
+                    for (int k = 0; k < SLOT; k++)
+                    {
+                        scanf("%d", &train_slot[k]);
+                    }
+                    printf("Experience: ");
+                    scanf("%d", &experience);
+                    printf("Qualify elo: ");
+                    scanf("%f", &qualify);
+                    printf("Max Students: ");
+                    scanf("%d", &max);
+
+                    status3 = insert_update_trainer(trainer_DB, TRAIN_DB_SIZE, train_id, train_name, train_elo_rating, coach_style, train_slot, experience, qualify, max);
+
+                    if (!status3)
+                    {
+                        printf("Database is full! Apply next time\n");
+                    }
+                    else
+                    {
+                        printf("Trainer data updated successfully\n");
+                    }
+                }
+
+                break;
+            
+            case 3:
+                printf("Enter the student name to be deleted; ");
+                scanf("%s", &stud_name);
+                printf("Enter the elo rating of student: ");
                 scanf("%f", &stud_elo_rating);
-                printf("Goals:");
-                scanf("%s", goals);
-                for (int k = 0; k < SLOT; k++)
-                {
-                    printf("slot %d: ",k+1);
-                    scanf("%d", &slot[k]);
-                }
-                printf("style: ");
-                scanf("%s", style);
-                printf("performance: ");
-                scanf("%s", performance);
-                printf("Games Won: ");
-                scanf("%d", &info.games_won);
-                printf("Puzzles Solved: ");
-                scanf("%d", &info.puzzles_solved);
-                for (int j = 0; j < 12; j++)
-                {
-                    printf("Month %d: ",j+1);
-                    scanf("%d", &info.ratings[j]);
-                }
+                int status2 = delete_student_record(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating);
 
-                status1 = insert_update_student(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating, goals, slot, style, assigned_train_id, performance, info);
-
-                if (!status1)
+                if (status2)
                 {
-                    printf("Database overload! Come next time\n");
+                    printf("Student Record deleted successfully!\n");
                 }
                 else
                 {
-                    printf("Student data updated successfully\n");
+                    printf("No student record of given name exists!\n");
                 }
-            }
+                break;
 
-            break;
-
-        case 2: 
-            printf("How many trainer records do you want to enter? ");
-            scanf("%d", &train_records);
-
-            for (int i = 0; i < train_records; i++)
-            {
-                printf("ID: ");
+            case 4: 
+                printf("Enter trainer ID to be deleted: ");
                 scanf("%d", &train_id);
-                printf("Name: ");
-                scanf("%s", train_name);
-                printf("ELO: ");
-                scanf("%f", &train_elo_rating);
-                printf("Style: ");
-                scanf("%s", coach_style);
-                printf("Slots: ");
-                for (int k = 0; k < SLOT; k++)
-                {
-                    scanf("%d", &train_slot[k]);
-                }
-                printf("Experience: ");
-                scanf("%d", &experience);
-                printf("Qualify elo: ");
-                scanf("%f", &qualify);
-                printf("Max Students: ");
-                scanf("%d", &max);
 
-                status3 = insert_update_trainer(trainer_DB, TRAIN_DB_SIZE, train_id, train_name, train_elo_rating, coach_style, train_slot, experience, qualify, max);
+                status4 = delete_trainer_record(trainer_DB, TRAIN_DB_SIZE, train_id);
 
-                if (!status3)
+                if (status4)
                 {
-                    printf("Database is full! Apply next time\n");
+                    printf("Trainer record deleted successfully\n");
                 }
                 else
                 {
-                    printf("Trainer data updated successfully\n");
+                    printf("No trainer record found\n");
                 }
-            }
+                break;
 
-            break;
-        
-        case 3:
-            printf("Enter the student name to be deleted; ");
-            scanf("%s", &stud_name);
-            printf("Enter the elo rating of student: ");
-            scanf("%f", &stud_elo_rating);
-            int status2 = delete_student_record(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating);
+            case 5: 
 
-            if (status2)
-            {
-                printf("Student Record deleted successfully!\n");
-            }
-            else
-            {
-                printf("No student record of given name exists!\n");
-            }
-            break;
+            case 6: 
+                struct student_attribute temp1[STUD_DB_SIZE];
+                sort_students_elo_rating(student_DB, temp1, STUD_DB_SIZE);
+                print_stud(student_DB, stud_records);
+                break;
 
-        case 4: 
-            printf("Enter trainer ID to be deleted: ");
-            scanf("%d", &train_id);
+            case 7: 
+                struct trainer_attribute temp3[TRAIN_DB_SIZE];
+                most_popular_trainer(trainer_DB, TRAIN_DB_SIZE, 0, train_records - 1, average, count);
+                mergeSort_popularity(trainer_DB, temp3, 0, train_records - 1, average, count);
+                break;
+                print_trainers(trainer_DB, TRAIN_DB_SIZE);
 
-            status4 = delete_trainer_record(trainer_DB, TRAIN_DB_SIZE, train_id);
+            case 8:
+                average_elo(trainer_DB, student_DB, STUD_DB_SIZE, TRAIN_DB_SIZE, average);
+                print_trainers(trainer_DB, TRAIN_DB_SIZE);
 
-            if (status4)
-            {
-                printf("Trainer record deleted successfully\n");
-            }
-            else
-            {
-                printf("No trainer record found\n");
-            }
-            break;
+            case 9:
+                match_pairs(count, student_DB, trainer_DB, STUD_DB_SIZE, TRAIN_DB_SIZE);
+                print_stud(student_DB, stud_records);
+                break;
 
-        case 5: 
+            case 10:
+                int size_succesive = successive_increase(student_DB, STUD_DB_SIZE, list);
+                struct student_attribute temp2[STUD_DB_SIZE];
+                mergeSort_decreasing_gains(list, temp2, 0, size_succesive-1);
+                print_stud(student_DB, STUD_DB_SIZE);
+                break;
 
-        case 6: 
-            struct student_attribute temp1[STUD_DB_SIZE];
-            sort_students_elo_rating(student_DB, temp1, STUD_DB_SIZE);
-            print_stud(student_DB, stud_records);
-            break;
+            case 11:
+                print_stud(student_DB, STUD_DB_SIZE);
+                break;
 
-        case 7: 
-            struct trainer_attribute temp3[TRAIN_DB_SIZE];
-            most_popular_trainer(trainer_DB, TRAIN_DB_SIZE, 0, train_records - 1, average, count);
-            mergeSort_popularity(trainer_DB, temp3, 0, train_records - 1, average, count);
-            break;
-            print_trainers(trainer_DB, TRAIN_DB_SIZE);
+            case 12:
+                print_trainers(trainer_DB, TRAIN_DB_SIZE);
+                break;
 
-        case 8:
-            average_elo(trainer_DB, student_DB, STUD_DB_SIZE, TRAIN_DB_SIZE, average);
-            print_trainers(trainer_DB, TRAIN_DB_SIZE);
+            case 13:
+                exit = 1;
+                break;
 
-        case 9:
-            match_pairs(count, student_DB, trainer_DB, STUD_DB_SIZE, TRAIN_DB_SIZE);
-            print_stud(student_DB, stud_records);
-            break;
-
-        case 10:
-            int size_succesive = successive_increase(student_DB, STUD_DB_SIZE, list);
-            struct student_attribute temp2[STUD_DB_SIZE];
-            mergeSort_decreasing_gains(list, temp2, 0, size_succesive-1);
-            print_stud(student_DB, STUD_DB_SIZE);
-            break;
-    }
+            default:
+                printf("Enter appropriate number for function!");
+        }
+    }while(exit == 0);
+    
 
     // Asking number of student records and taking input.
 

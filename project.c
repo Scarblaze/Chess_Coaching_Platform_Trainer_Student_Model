@@ -454,80 +454,61 @@ int successive_increase(struct student_attribute student_DB[], int stud_records,
     return cnt;
 }
 
-void match_pairs(int count[], struct student_attribute a[], struct trainer_attribute b[], int stud_records, int train_records)
+void match_pairs(int count[], struct student_attribute students[], struct trainer_attribute trainers[],int stud_records, int train_records)
 {
-    int flag1 = 0, flag2 = 0, flag3 = 0, flag4 = 0, found = 0;
     for (int i = 0; i < train_records; i++)
     {
         count[i] = 0;
     }
+
     for (int i = 0; i < stud_records; i++)
     {
-        for (int j = 0; j < train_records && flag1 == 0; j++)
+        int best_match = -1;
+        for (int j = 0; j < train_records; j++)
         {
-            if (count[j] <= b[j].max_students)
+            if (count[j] < trainers[j].max_students)
             {
-                for (int k = 0; k < SLOT && found == 0; k++)
+                int time_match = 0;
+                for (int k = 0; k < SLOT && !time_match; k++)
                 {
-                    for (int m = 0; m < SLOT && found == 0; m++)
+                    for (int m = 0; m < SLOT && !time_match; m++)
                     {
-                        if (a[i].time_slot[k] == b[j].free_time_slot[m])
+                        if (students[i].time_slot[k] == trainers[j].free_time_slot[m])
                         {
-                            found = 1;
+                            time_match = 1;
                         }
                     }
                 }
-                if (found)
+                if (time_match)
                 {
-                    if (strcmp(a[i].preferred_coaching_style, b[j].coaching_style) == 0)
+                    if (strcmp(students[i].preferred_coaching_style, trainers[j].coaching_style) == 0)
                     {
-                        if (a[i].student_elo_rating >= b[j].trainer_elo_rating)
+                        if (students[i].student_elo_rating >= trainers[j].qualify_elo)
                         {
-                            flag1 = 1;
-                            a[i].assigned_trainer_id = b[j].trainer_id;
-                            count[j]++;
-                            // strcpy(c[i].student_name_matched, a[i].student_name);
-                            // strcpy(c[i].trainer_name_matched, b[j].trainer_name);
-                            // strcpy(c[i].train_id_matched, b[j].trainer_name);
-                            // c[i].student_elo = a[i].student_elo_rating;
+                            best_match = j;
+                            break;
                         }
-
-                        else
+                        else if (best_match == -1 || trainers[j].qualify_elo < trainers[best_match].qualify_elo)
                         {
-                            if (flag2 == 0)
-                            {
-                                flag2 = 1;
-                                count[j]++;
-                                a[i].assigned_trainer_id = b[j].trainer_id;
-                                // strcpy(c[i].student_name_matched, a[i].student_name);
-                                // strcpy(c[i].trainer_name_matched, b[j].trainer_name);
-                                // strcpy(c[i].train_id_matched, b[j].trainer_name);
-                                // c[i].student_elo = a[i].student_elo_rating;
-                            }
+                            best_match = j;
                         }
                     }
-
-                    else if (flag2 == 0)
+                    else if (best_match == -1)
                     {
-                        if (flag3 == 0)
-                        {
-                            if (a[i].student_elo_rating >= b[j].trainer_elo_rating)
-                            {
-                                flag3 = 1;
-                                a[i].assigned_trainer_id = b[j].trainer_id;
-                                count[j]++;
-                                // strcpy(c[i].student_name_matched, a[i].student_name);
-                                // strcpy(c[i].trainer_name_matched, b[j].trainer_name);
-                                // strcpy(c[i].train_id_matched, b[j].trainer_name);
-                                // c[i].student_elo = a[i].student_elo_rating;
-                            }
-                        }
+                        best_match = j;
                     }
                 }
             }
         }
+        if (best_match != -1)
+        {
+            students[i].assigned_trainer_id = trainers[best_match].trainer_id;
+            count[best_match]++;
+        }
     }
+
 }
+
 
 
 void average_elo(struct trainer_attribute trainer_DB[], struct student_attribute student_DB[], int stud_records, int train_records, float average[])

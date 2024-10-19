@@ -594,6 +594,18 @@ void most_popular_trainer(struct trainer_attribute trainer_DB[], int train_recor
     printf("Most popular trainer: %s\nTrainer ID: %d", trainer_DB[0].trainer_name, trainer_DB[0].trainer_id);
 }
 
+void student_trainer_list(struct student_attribute student_DB[], struct trainer_attribute trainer_DB[], int size_stud, int size_train)
+{
+    for(int i=0; i<TRAIN_DB_SIZE; i++){
+        printf("Students of trainer %s, Trainer ID %d:\n", trainer_DB[i].trainer_name, trainer_DB[i].trainer_id);
+        for(int j=0; j<STUD_DB_SIZE; j++){
+            if(trainer_DB[i].trainer_id==student_DB[j].assigned_trainer_id){
+                printf("%s\n", student_DB[j].student_name);
+            }
+        }
+    }
+}
+
 void print_stud(struct student_attribute s[], int size)
 {
     for(int i=0; i<size; i++)
@@ -815,6 +827,9 @@ void main()
                 break;
 
             case 5: 
+                printf("Student-Trainer list:\n");
+                student_trainer_list(student_DB, trainer_DB, STUD_DB_SIZE, TRAIN_DB_SIZE);
+                break;
 
             case 6: 
                 struct student_attribute temp1[STUD_DB_SIZE];

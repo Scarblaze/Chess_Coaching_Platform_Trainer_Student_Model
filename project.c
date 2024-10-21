@@ -7,10 +7,10 @@
 #include <stdlib.h>
 
 #define NAME_LEN 100
-#define GOALS 50
+#define GOALS 20
 #define SLOT 5
-#define STYLE 25
-#define PERFORMANCE 50
+#define STYLE 20
+#define PERFORMANCE 20
 #define STUD_DB_SIZE 100
 #define SUCCESS 1
 #define FAILURE 0

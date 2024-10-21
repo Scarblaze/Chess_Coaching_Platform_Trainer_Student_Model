@@ -97,7 +97,7 @@ void Initialize_student_DB(struct student_attribute students[], int size)
 int insert_update_trainer(struct trainer_attribute trainer_DB[], int size, int train_id, char train_name[], float train_elo_rating, char coach_style[], int slot[], int experience, float qualify, int max)
 {
     int status = SUCCESS;
-    int i = 20, j, found = 0, free_loc;
+    int i = 0, j, found = 0, free_loc;
     while (i < size && !found)
     {
         if ((trainer_DB[i].trainer_id == train_id))
@@ -124,7 +124,7 @@ int insert_update_trainer(struct trainer_attribute trainer_DB[], int size, int t
     }
     else
     {
-        j = 20, free_loc = 0;
+        j = 0, free_loc = 0;
         while (j < size && free_loc == 0)
         {
             if (trainer_DB[j].trainer_id == 0)
@@ -167,7 +167,7 @@ int insert_update_student(struct student_attribute student_DB[], int size, char 
     // Checking if corresponding data exists for student
 
     int status = SUCCESS;
-    int i = 20, j, found = 0, free_loc;
+    int i = 0, j, found = 0, free_loc;
     while (i < size && !found)
     {
         if ((strcmp(student_DB[i].student_name, stud_name) == 0) && (student_DB[i].student_elo_rating == stud_elo_rating))
@@ -201,7 +201,7 @@ int insert_update_student(struct student_attribute student_DB[], int size, char 
     }
     else
     {
-        j = 20, free_loc = 0;
+        j = 0, free_loc = 0;
         while (j < size && free_loc == 0)
         {
             if (student_DB[j].student_name[0] == '\0' && student_DB[j].student_elo_rating == 0)
@@ -473,6 +473,7 @@ int successive_increase(struct student_attribute student_DB[], int stud_records,
 
 void match_pairs(int count[], struct student_attribute students[], struct trainer_attribute trainers[], int stud_records, int train_records)
 {
+    int best_match, time_match; 
     for (int i = 0; i < train_records; i++)
     {
         count[i] = 0;
@@ -480,12 +481,12 @@ void match_pairs(int count[], struct student_attribute students[], struct traine
 
     for (int i = 0; i < stud_records; i++)
     {
-        int best_match = -1;
+        best_match = -1;
         for (int j = 0; j < train_records; j++)
         {
             if (count[j] < trainers[j].max_students)
             {
-                int time_match = 0;
+                time_match = 0;
                 for (int k = 0; k < SLOT && !time_match; k++)
                 {
                     for (int m = 0; m < SLOT && !time_match; m++)
@@ -629,7 +630,7 @@ void most_popular_trainer(struct trainer_attribute trainer_DB[], int train_recor
 
 void student_trainer_list(struct student_attribute student_DB[], struct trainer_attribute trainer_DB[], int size_stud, int size_train)
 {
-    for (int i = 0; i < size_train; i++)
+    for (int i = 0; i < size_train && trainer_DB[i].trainer_id != 0; i++)
     {
         printf("Students of trainer %s, Trainer ID %d:\n", trainer_DB[i].trainer_name, trainer_DB[i].trainer_id);
         for (int j = 0; j < size_stud; j++)
@@ -1449,7 +1450,7 @@ int main()
     // Intializing DB vales to zero.
     Initialize_student_DB(student_DB, STUD_DB_SIZE);
     Initialize_trainer_DB(trainer_DB, TRAIN_DB_SIZE);
-    Initialize_student_DB(list, stud_records);
+    Initialize_student_DB(list, STUD_DB_SIZE);
 
     // hardcoded values for 20 students and trainers
     hardcode1(student_DB);
@@ -1495,7 +1496,7 @@ int main()
                     scanf("%d", &info.ratings[j]);
                 }
 
-                status1 = insert_update_student(student_DB, 20 + stud_records, stud_name, stud_elo_rating, goals, slot, style, assigned_train_id, performance, info);
+                status1 = insert_update_student(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating, goals, slot, style, assigned_train_id, performance, info);
 
                 if (!status1)
                 {
@@ -1536,7 +1537,7 @@ int main()
                 printf("Max Students: ");
                 scanf("%d", &max);
 
-                status3 = insert_update_trainer(trainer_DB, 20 + train_records, train_id, train_name, train_elo_rating, coach_style, train_slot, experience, qualify, max);
+                status3 = insert_update_trainer(trainer_DB, TRAIN_DB_SIZE, train_id, train_name, train_elo_rating, coach_style, train_slot, experience, qualify, max);
 
                 if (!status3)
                 {
@@ -1555,7 +1556,7 @@ int main()
             scanf("%s", &stud_name);
             printf("Enter the elo rating of student: ");
             scanf("%f", &stud_elo_rating);
-            int status2 = delete_student_record(student_DB, 20 + stud_records, stud_name, stud_elo_rating);
+            int status2 = delete_student_record(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating);
 
             if (status2)
             {
@@ -1571,7 +1572,7 @@ int main()
             printf("Enter trainer ID to be deleted: ");
             scanf("%d", &train_id);
 
-            status4 = delete_trainer_record(trainer_DB, 20 + train_records, train_id);
+            status4 = delete_trainer_record(trainer_DB, TRAIN_DB_SIZE, train_id);
 
             if (status4)
             {
@@ -1585,43 +1586,41 @@ int main()
 
         case 5:
             printf("Student-Trainer list:\n");
-            student_trainer_list(student_DB, trainer_DB, 20 + stud_records, 20 + train_records);
+            student_trainer_list(student_DB, trainer_DB, STUD_DB_SIZE, TRAIN_DB_SIZE);
             break;
 
         case 6:
-
-            sort_students_elo_rating(student_DB, temp1, 20 + stud_records);
-            print_stud(student_DB, 20 + stud_records);
+            sort_students_elo_rating(student_DB, temp1, STUD_DB_SIZE);
+            print_stud(student_DB, STUD_DB_SIZE);
             break;
 
         case 7:
-            average_elo(trainer_DB, student_DB, 20 + stud_records, 20 + train_records, average);
-            most_popular_trainer(trainer_DB, 20 + train_records, 0, 20 + train_records - 1, average, count);
+            average_elo(trainer_DB, student_DB, STUD_DB_SIZE, TRAIN_DB_SIZE, average);
+            most_popular_trainer(trainer_DB, TRAIN_DB_SIZE, 0, TRAIN_DB_SIZE - 1, average, count);
             break;
 
         case 8:
-            average_elo(trainer_DB, student_DB, 20 + stud_records, 20 + train_records, average);
-            strongest(trainer_DB, temp5, 0, 20 + train_records - 1, average);
+            average_elo(trainer_DB, student_DB, STUD_DB_SIZE, TRAIN_DB_SIZE, average);
+            strongest(trainer_DB, temp5, 0, TRAIN_DB_SIZE - 1, average);
             break;
 
         case 9:
-            match_pairs(count, student_DB, trainer_DB, 20 + stud_records, 20 + train_records);
-            print_stud(student_DB, 20 + stud_records);
+            match_pairs(count, student_DB, trainer_DB, STUD_DB_SIZE, TRAIN_DB_SIZE);
+            print_stud(student_DB, STUD_DB_SIZE);
             break;
 
         case 10:
-            size_succesive = successive_increase(student_DB, 20 + stud_records, list);
-
+            size_succesive = successive_increase(student_DB, STUD_DB_SIZE, list);
             mergeSort_decreasing_gains(list, temp2, 0, size_succesive - 1);
             print_stud(list, size_succesive);
             break;
 
         case 11:
-            print_stud(student_DB, 20 + stud_records);
+            print_stud(student_DB, STUD_DB_SIZE);
             break;
 
         case 12:
-            print_trainers(trainer_DB, 20 + train_records);
+            print_trainers(trainer_DB, TRAIN_DB_SIZE);
             break;
 
         case 13:
@@ -1629,7 +1628,7 @@ int main()
             break;
 
         default:
-            printf("Enter appropriate number for function!");
+            printf("Enter appropriate number for function!\n\n");
         }
     } while (exit == 0);
 

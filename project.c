@@ -1413,7 +1413,7 @@ int main()
     char goals[GOALS];
     int slot[SLOT];
     char style[STYLE];
-    int assigned_train_id, stud_records;
+    int assigned_train_id, stud_records=0;
     char performance[PERFORMANCE];
     struct progress info;
     int status;
@@ -1430,7 +1430,7 @@ int main()
     int train_slot[SLOT];
     int experience;
     float qualify;
-    int max, train_records, status3, status4;
+    int max, train_records=0, status3, status4;
     struct trainer_attribute trainer_DB[TRAIN_DB_SIZE];
 
     // Other variables
@@ -1444,6 +1444,7 @@ int main()
     struct trainer_attribute temp3[TRAIN_DB_SIZE];
     struct trainer_attribute temp5[TRAIN_DB_SIZE];
     int size_succesive;
+    int x, y;
 
     // Intializing DB vales to zero.
     Initialize_student_DB(student_DB, STUD_DB_SIZE);
@@ -1464,7 +1465,8 @@ int main()
         {
         case 1:
             printf("How many student records you want to enter: ");
-            scanf("%d", &stud_records);
+            scanf("%d", &x);
+            stud_records=x;
 
             for (int i = 0; i < stud_records; i++)
             {
@@ -1509,7 +1511,8 @@ int main()
 
         case 2:
             printf("How many trainer records do you want to enter? ");
-            scanf("%d", &train_records);
+            scanf("%d", &y);
+            train_records=y;
 
             for (int i = 0; i < train_records; i++)
             {

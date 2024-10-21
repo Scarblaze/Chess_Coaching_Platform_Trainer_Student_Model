@@ -7,10 +7,10 @@
 #define SLOT 5
 #define STYLE 25
 #define PERFORMANCE 50
-#define STUD_DB_SIZE 500
+#define STUD_DB_SIZE 30
 #define SUCCESS 1
 #define FAILURE 0
-#define TRAIN_DB_SIZE 250
+#define TRAIN_DB_SIZE 30
 
 struct progress
 {
@@ -95,7 +95,7 @@ void Initialize_student_DB(struct student_attribute students[], int size)
 int insert_update_trainer(struct trainer_attribute trainer_DB[], int size, int train_id, char train_name[], float train_elo_rating, char coach_style[], int slot[], int experience, float qualify, int max)
 {
     int status = SUCCESS;
-    int i = 0, j, found = 0, free_loc;
+    int i = 20, j, found = 0, free_loc;
     while (i < size && !found)
     {
         if ((trainer_DB[i].trainer_id == train_id))
@@ -122,7 +122,7 @@ int insert_update_trainer(struct trainer_attribute trainer_DB[], int size, int t
     }
     else
     {
-        j = 0, free_loc = 0;
+        j = 20, free_loc = 0;
         while (j < size && free_loc == 0)
         {
             if (trainer_DB[j].trainer_id == 0)
@@ -165,7 +165,7 @@ int insert_update_student(struct student_attribute student_DB[], int size, char 
     // Check if corresponding data exists for student
 
     int status = SUCCESS;
-    int i = 0, j, found = 0, free_loc;
+    int i = 20, j, found = 0, free_loc;
     while (i < size && !found)
     {
         if ((strcmp(student_DB[i].student_name, stud_name) == 0) && (student_DB[i].student_elo_rating == stud_elo_rating))
@@ -202,7 +202,7 @@ int insert_update_student(struct student_attribute student_DB[], int size, char 
     }
     else
     {
-        j = 0, free_loc = 0;
+        j = 20, free_loc = 0;
         while (j < size && free_loc == 0)
         {
             if (student_DB[j].student_name[0] == '\0' && student_DB[j].student_elo_rating == 0)
@@ -445,7 +445,7 @@ int successive_increase(struct student_attribute student_DB[], int stud_records,
                 flag = 1; 
             }
         }
-        if (!flag)
+        if (flag==0)
         {
             cnt++;
             list[m++] = student_DB[i];
@@ -513,28 +513,30 @@ void match_pairs(int count[], struct student_attribute students[], struct traine
 
 void average_elo(struct trainer_attribute trainer_DB[], struct student_attribute student_DB[], int stud_records, int train_records, float average[])
 {
-    float sum = 0;
-    int cnt = 0;
     for (int i = 0; i < train_records; i++)
     {
+        float sum = 0;
+        int cnt = 0;
         for (int j = 0; j < stud_records; j++)
         {
             if (trainer_DB[i].trainer_id == student_DB[j].assigned_trainer_id)
             {
-                sum = sum + student_DB[j].student_elo_rating;
+                sum += student_DB[j].student_elo_rating;
                 cnt++;
             }
         }
-        average[i] = sum / (float)cnt;
+        if (cnt != 0)
+            average[i] = sum / (float)cnt; 
+        else
+            average[i] = 0; 
     }
 }
 
+
 void merge_self_popularity(struct trainer_attribute trainer_DB[], int l, int m, int n, struct trainer_attribute temp[], float average[], int count[])
 {
-    int i, j, k;
-    i = l;
-    j = m + 1;
-    k = l;
+    int i = l, j = m + 1, k = l;
+
     while ((i <= m) && (j <= n))
     {
         if (count[i] > count[j])
@@ -547,6 +549,22 @@ void merge_self_popularity(struct trainer_attribute trainer_DB[], int l, int m, 
             {
                 temp[k++] = trainer_DB[i++];
             }
+            else if (average[i] == average[j])
+            {
+                
+                if (strcmp(trainer_DB[i].trainer_name, trainer_DB[j].trainer_name) < 0)
+                {
+                    temp[k++] = trainer_DB[i++];
+                }
+                else
+                {
+                    temp[k++] = trainer_DB[j++];
+                }
+            }
+            else
+            {
+                temp[k++] = trainer_DB[j++];
+            }
         }
         else
         {
@@ -554,19 +572,14 @@ void merge_self_popularity(struct trainer_attribute trainer_DB[], int l, int m, 
         }
     }
 
-    if (i <= m)
+    while (i <= m)
     {
-        while (i <= m)
-        {
-            temp[k++] = trainer_DB[i++];
-        }
+        temp[k++] = trainer_DB[i++];
     }
-    else
+
+    while (j <= n)
     {
-        while (j <= n)
-        {
-            temp[k++] = trainer_DB[j++];
-        }
+        temp[k++] = trainer_DB[j++];
     }
 
     for (i = l; i <= n; i++)
@@ -575,30 +588,31 @@ void merge_self_popularity(struct trainer_attribute trainer_DB[], int l, int m, 
     }
 }
 
+
 void mergeSort_popularity(struct trainer_attribute trainer_DB[], struct trainer_attribute temp[], int lo, int hi, float average[], int count[])
 {
-    int mid;
     if (lo < hi)
     {
-        mid = lo + (hi - lo) / 2;
+        int mid = lo + (hi - lo) / 2;
         mergeSort_popularity(trainer_DB, temp, lo, mid, average, count);
         mergeSort_popularity(trainer_DB, temp, mid + 1, hi, average, count);
         merge_self_popularity(trainer_DB, lo, mid, hi, temp, average, count);
     }
 }
 
+
 void most_popular_trainer(struct trainer_attribute trainer_DB[], int train_records, int lo, int hi, float average[], int count[])
 {
     struct trainer_attribute temp[train_records];
     mergeSort_popularity(trainer_DB, temp, 0, train_records - 1, average, count);
-    printf("Most popular trainer: %s\nTrainer ID: %d", trainer_DB[0].trainer_name, trainer_DB[0].trainer_id);
+    printf("Most popular trainer: %s\nTrainer ID: %d\n", trainer_DB[0].trainer_name, trainer_DB[0].trainer_id);
 }
 
 void student_trainer_list(struct student_attribute student_DB[], struct trainer_attribute trainer_DB[], int size_stud, int size_train)
 {
-    for(int i=0; i<TRAIN_DB_SIZE; i++){
+    for(int i=0; i<size_train; i++){
         printf("Students of trainer %s, Trainer ID %d:\n", trainer_DB[i].trainer_name, trainer_DB[i].trainer_id);
-        for(int j=0; j<STUD_DB_SIZE; j++){
+        for(int j=0; j<size_stud; j++){
             if(trainer_DB[i].trainer_id==student_DB[j].assigned_trainer_id){
                 printf("%s\n", student_DB[j].student_name);
             }
@@ -628,6 +642,7 @@ void print_stud(struct student_attribute s[], int size)
             {
                 printf("Ratings %d: %d\n",k+1,s[i].data.ratings[k]);
             }
+            printf("\n");
         }
         
     }
@@ -657,6 +672,585 @@ void print_trainers(struct trainer_attribute t[], int size)
     }
 }
 
+void hardcode1(struct student_attribute record1[]) {
+
+    
+    // 1. Alex
+    strcpy(record1[0].student_name, "Alex");
+    record1[0].student_elo_rating = 1350.5;
+    strcpy(record1[0].learn_goals, "Tactics");
+    record1[0].time_slot[0] = 5; record1[0].time_slot[1] = 3; record1[0].time_slot[2] = 8;
+    record1[0].time_slot[3] = 6; record1[0].time_slot[4] = 9;
+    strcpy(record1[0].preferred_coaching_style, "Aggressive");
+    record1[0].assigned_trainer_id = 0;
+    strcpy(record1[0].performance_data, "Endgame");
+    record1[0].data.games_won = 20;
+    record1[0].data.puzzles_solved = 80;
+    int alex_student_elo_ratings[] = {1340, 1350, 1360, 1345, 1340, 1355, 1360, 1365, 1370, 1375, 1380, 1390};
+    for (int j = 0; j < 12; j++) record1[0].data.ratings[j] = alex_student_elo_ratings[j];
+
+    // 2. Sam
+    strcpy(record1[1].student_name, "Sam");
+    record1[1].student_elo_rating = 1800.0;
+    strcpy(record1[1].learn_goals, "Endgame");
+    record1[1].time_slot[0] = 7; record1[1].time_slot[1] = 9; record1[1].time_slot[2] = 2;
+    record1[1].time_slot[3] = 5; record1[1].time_slot[4] = 4;
+    strcpy(record1[1].preferred_coaching_style, "Defensive");
+    record1[1].assigned_trainer_id = 0;
+    strcpy(record1[1].performance_data, "Opening");
+    record1[1].data.games_won = 30;
+    record1[1].data.puzzles_solved = 90;
+    int sam_student_elo_ratings[] = {1800, 1810, 1820, 1815, 1810, 1825, 1830, 1835, 1840, 1850, 1855, 1860};
+    for (int j = 0; j < 12; j++) record1[1].data.ratings[j] = sam_student_elo_ratings[j];
+
+    // 3. Chris
+    strcpy(record1[2].student_name, "Chris");
+    record1[2].student_elo_rating = 1600.0;
+    strcpy(record1[2].learn_goals, "Middlegame");
+    record1[2].time_slot[0] = 4; record1[2].time_slot[1] = 2; record1[2].time_slot[2] = 10;
+    record1[2].time_slot[3] = 3; record1[2].time_slot[4] = 8;
+    strcpy(record1[2].preferred_coaching_style, "Positional");
+    record1[2].assigned_trainer_id = 0;
+    strcpy(record1[2].performance_data, "Transitions");
+    record1[2].data.games_won = 25;
+    record1[2].data.puzzles_solved = 70;
+    int chris_student_elo_ratings[] = {1600, 1610, 1605, 1620, 1615, 1630, 1625, 1640, 1635, 1650, 1645, 1660};
+    for (int j = 0; j < 12; j++) record1[2].data.ratings[j] = chris_student_elo_ratings[j];
+
+    // 4. Jamie
+    strcpy(record1[3].student_name, "Jamie");
+    record1[3].student_elo_rating = 1750.5;
+    strcpy(record1[3].learn_goals, "Calculation");
+    record1[3].time_slot[0] = 6; record1[3].time_slot[1] = 8; record1[3].time_slot[2] = 4;
+    record1[3].time_slot[3] = 10; record1[3].time_slot[4] = 1;
+    strcpy(record1[3].preferred_coaching_style, "Defensive");
+    record1[3].assigned_trainer_id = 0;
+    strcpy(record1[3].performance_data, "Tactics");
+    record1[3].data.games_won = 35;
+    record1[3].data.puzzles_solved = 100;
+    int jamie1_student_elo_ratings[] = {1750, 1760, 1770, 1765, 1775, 1780, 1770, 1785, 1790, 1795, 1800, 1810};
+    for (int j = 0; j < 12; j++) record1[3].data.ratings[j] = jamie1_student_elo_ratings[j];
+
+    // 5. Taylor
+    strcpy(record1[4].student_name, "Taylor");
+    record1[4].student_elo_rating = 1400.0;
+    strcpy(record1[4].learn_goals, "Openings");
+    record1[4].time_slot[0] = 3; record1[4].time_slot[1] = 10; record1[4].time_slot[2] = 5;
+    record1[4].time_slot[3] = 7; record1[4].time_slot[4] = 9;
+    strcpy(record1[4].preferred_coaching_style, "Aggressive");
+    record1[4].assigned_trainer_id = 0;
+    strcpy(record1[4].performance_data, "Opening Theory");
+    record1[4].data.games_won = 15;
+    record1[4].data.puzzles_solved = 60;
+    int taylor_student_elo_ratings[] = {1400, 1405, 1410, 1420, 1415, 1425, 1430, 1435, 1440, 1445, 1450, 1455};
+    for (int j = 0; j < 12; j++) record1[4].data.ratings[j] = taylor_student_elo_ratings[j];
+
+    // 6. Jordan
+    strcpy(record1[5].student_name, "Jordan");
+    record1[5].student_elo_rating = 1650.0;
+    strcpy(record1[5].learn_goals, "Defense");
+    record1[5].time_slot[0] = 2; record1[5].time_slot[1] = 5; record1[5].time_slot[2] = 7;
+    record1[5].time_slot[3] = 9; record1[5].time_slot[4] = 6;
+    strcpy(record1[5].preferred_coaching_style, "Defensive");
+    record1[5].assigned_trainer_id = 0;
+    strcpy(record1[5].performance_data, "Attacking");
+    record1[5].data.games_won = 22;
+    record1[5].data.puzzles_solved = 75;
+    int jordan1_student_elo_ratings[] = {1650, 1660, 1670, 1675, 1665, 1680, 1670, 1685, 1690, 1700, 1710, 1720};
+    for (int j = 0; j < 12; j++) record1[5].data.ratings[j] = jordan1_student_elo_ratings[j];
+
+    // 7. Morgan
+    strcpy(record1[6].student_name, "Morgan");
+    record1[6].student_elo_rating = 1550.5;
+    strcpy(record1[6].learn_goals, "Tactics");
+    record1[6].time_slot[0] = 5; record1[6].time_slot[1] = 6; record1[6].time_slot[2] = 2;
+    record1[6].time_slot[3] = 1; record1[6].time_slot[4] = 9;
+    strcpy(record1[6].preferred_coaching_style, "Aggressive");
+    record1[6].assigned_trainer_id = 0;
+    strcpy(record1[6].performance_data, "Endgames");
+    record1[6].data.games_won = 20;
+    record1[6].data.puzzles_solved = 60;
+    int morgan_student_elo_ratings[] = {1550, 1560, 1570, 1565, 1555, 1575, 1580, 1590, 1600, 1605, 1610, 1620};
+    for (int j = 0; j < 12; j++) record1[6].data.ratings[j] = morgan_student_elo_ratings[j];
+
+    // 8. Riley
+    strcpy(record1[7].student_name, "Riley");
+    record1[7].student_elo_rating = 1500.0;
+    strcpy(record1[7].learn_goals, "Attacking");
+    record1[7].time_slot[0] = 10; record1[7].time_slot[1] = 7; record1[7].time_slot[2] = 3;
+    record1[7].time_slot[3] = 4; record1[7].time_slot[4] = 8;
+    strcpy(record1[7].preferred_coaching_style, "Aggressive");
+    record1[7].assigned_trainer_id = 0;
+    strcpy(record1[7].performance_data, "Positional Play");
+    record1[7].data.games_won = 30;
+    record1[7].data.puzzles_solved = 80;
+    int riley_student_elo_ratings[] = {1500, 1510, 1520, 1515, 1505, 1525, 1530, 1540, 1550, 1560, 1570, 1580};
+    for (int j = 0; j < 12; j++) record1[7].data.ratings[j] = riley_student_elo_ratings[j];
+
+    // Add more students (9 to 19) similarly...
+
+   
+    // (Previous records for students 0 to 8)
+
+    // 9. Alex
+    strcpy(record1[8].student_name, "Alex");
+    record1[8].student_elo_rating = 1400.5;
+    strcpy(record1[8].learn_goals, "Tactics");
+    record1[8].time_slot[0] = 3; record1[8].time_slot[1] = 8; record1[8].time_slot[2] = 5;
+    record1[8].time_slot[3] = 10; record1[8].time_slot[4] = 6;
+    strcpy(record1[8].preferred_coaching_style, "Aggressive");
+    record1[8].assigned_trainer_id = 0;
+    strcpy(record1[8].performance_data, "Endgame");
+    record1[8].data.games_won = 18;
+    record1[8].data.puzzles_solved = 85;
+    int alex2_student_elo_ratings[] = {1400, 1410, 1405, 1415, 1410, 1420, 1430, 1435, 1440, 1445, 1450, 1455};
+    for (int j = 0; j < 12; j++) record1[8].data.ratings[j] = alex2_student_elo_ratings[j];
+
+    // 10. Taylor
+    strcpy(record1[9].student_name, "Taylor");
+    record1[9].student_elo_rating = 1900.0;
+    strcpy(record1[9].learn_goals, "Strategy");
+    record1[9].time_slot[0] = 1; record1[9].time_slot[1] = 9; record1[9].time_slot[2] = 7;
+    record1[9].time_slot[3] = 4; record1[9].time_slot[4] = 2;
+    strcpy(record1[9].preferred_coaching_style, "Defensive");
+    record1[9].assigned_trainer_id = 0;
+    strcpy(record1[9].performance_data, "Tactics");
+    record1[9].data.games_won = 40;
+    record1[9].data.puzzles_solved = 95;
+    int taylor1_student_elo_ratings[] = {1900, 1905, 1910, 1920, 1915, 1925, 1930, 1935, 1940, 1950, 1955, 1960};
+    for (int j = 0; j < 12; j++) record1[9].data.ratings[j] = taylor1_student_elo_ratings[j];
+
+    // 11. Casey
+    strcpy(record1[10].student_name, "Casey");
+    record1[10].student_elo_rating = 1750.5;
+    strcpy(record1[10].learn_goals, "Endgame");
+    record1[10].time_slot[0] = 6; record1[10].time_slot[1] = 8; record1[10].time_slot[2] = 10;
+    record1[10].time_slot[3] = 1; record1[10].time_slot[4] = 3;
+    strcpy(record1[10].preferred_coaching_style, "Aggressive");
+    record1[10].assigned_trainer_id = 0;
+    strcpy(record1[10].performance_data, "Strategy");
+    record1[10].data.games_won = 45;
+    record1[10].data.puzzles_solved = 99;
+    int casey_student_elo_ratings[] = {1750, 1760, 1770, 1765, 1780, 1785, 1790, 1795, 1800, 1805, 1810, 1820};
+    for (int j = 0; j < 12; j++) record1[10].data.ratings[j] = casey_student_elo_ratings[j];
+
+    // 12. Jordan
+    strcpy(record1[11].student_name, "Jordan");
+    record1[11].student_elo_rating = 1650.0;
+    strcpy(record1[11].learn_goals, "Defense");
+    record1[11].time_slot[0] = 3; record1[11].time_slot[1] = 2; record1[11].time_slot[2] = 8;
+    record1[11].time_slot[3] = 4; record1[11].time_slot[4] = 9;
+    strcpy(record1[11].preferred_coaching_style, "Defensive");
+    record1[11].assigned_trainer_id = 0;
+    strcpy(record1[11].performance_data, "Calculation");
+    record1[11].data.games_won = 25;
+    record1[11].data.puzzles_solved = 90;
+    int jordan_student_elo_ratings[] = {1650, 1665, 1675, 1680, 1670, 1690, 1700, 1705, 1710, 1715, 1720, 1730};
+    for (int j = 0; j < 12; j++) record1[11].data.ratings[j] = jordan_student_elo_ratings[j];
+
+    // 13. Kim
+    strcpy(record1[12].student_name, "Kim");
+    record1[12].student_elo_rating = 1580.5;
+    strcpy(record1[12].learn_goals, "Middlegame");
+    record1[12].time_slot[0] = 9; record1[12].time_slot[1] = 1; record1[12].time_slot[2] = 3;
+    record1[12].time_slot[3] = 5; record1[12].time_slot[4] = 7;
+    strcpy(record1[12].preferred_coaching_style, "Aggressive");
+    record1[12].assigned_trainer_id = 0;
+    strcpy(record1[12].performance_data, "Opening");
+    record1[12].data.games_won = 20;
+    record1[12].data.puzzles_solved = 80;
+    int kim_student_elo_ratings[] = {1580, 1590, 1600, 1605, 1610, 1620, 1625, 1630, 1640, 1650, 1660, 1665};
+    for (int j = 0; j < 12; j++) record1[12].data.ratings[j] = kim_student_elo_ratings[j];
+
+    // 14. Taylor
+    strcpy(record1[13].student_name, "Taylor");
+    record1[13].student_elo_rating = 1450.0;
+    strcpy(record1[13].learn_goals, "Analysis");
+    record1[13].time_slot[0] = 2; record1[13].time_slot[1] = 6; record1[13].time_slot[2] = 8;
+    record1[13].time_slot[3] = 4; record1[13].time_slot[4] = 3;
+    strcpy(record1[13].preferred_coaching_style, "Defensive");
+    record1[13].assigned_trainer_id = 0;
+    strcpy(record1[13].performance_data, "Endgame");
+    record1[13].data.games_won = 15;
+    record1[13].data.puzzles_solved = 70;
+    int taylor2_student_elo_ratings_2[] = {1450, 1460, 1470, 1480, 1485, 1490, 1495, 1500, 1505, 1510, 1520, 1525};
+    for (int j = 0; j < 12; j++) record1[13].data.ratings[j] = taylor2_student_elo_ratings_2[j];
+
+    // 15. Morgan
+    strcpy(record1[14].student_name, "Morgan");
+    record1[14].student_elo_rating = 1300.0;
+    strcpy(record1[14].learn_goals, "Endgame");
+    record1[14].time_slot[0] = 7; record1[14].time_slot[1] = 2; record1[14].time_slot[2] = 5;
+    record1[14].time_slot[3] = 6; record1[14].time_slot[4] = 1;
+    strcpy(record1[14].preferred_coaching_style, "Aggressive");
+    record1[14].assigned_trainer_id = 0;
+    strcpy(record1[14].performance_data, "Middlegame");
+    record1[14].data.games_won = 12;
+    record1[14].data.puzzles_solved = 65;
+    int morgan_student_elo_ratings_2[] = {1300, 1310, 1320, 1330, 1340, 1350, 1360, 1370, 1380, 1390, 1400, 1405};
+    for (int j = 0; j < 12; j++) record1[14].data.ratings[j] = morgan_student_elo_ratings_2[j];
+
+    // 16. Jamie
+    strcpy(record1[15].student_name, "Jamie");
+    record1[15].student_elo_rating = 1505.0;
+    strcpy(record1[15].learn_goals, "Calculation");
+    record1[15].time_slot[0] = 4; record1[15].time_slot[1] = 8; record1[15].time_slot[2] = 1;
+    record1[15].time_slot[3] = 5; record1[15].time_slot[4] = 3;
+    strcpy(record1[15].preferred_coaching_style, "Defensive");
+    record1[15].assigned_trainer_id = 0;
+    strcpy(record1[15].performance_data, "Tactics");
+    record1[15].data.games_won = 27;
+    record1[15].data.puzzles_solved = 88;
+    int jamie_student_elo_ratings[] = {1505, 1515, 1520, 1525, 1530, 1540, 1550, 1555, 1560, 1570, 1580, 1590};
+    for (int j = 0; j < 12; j++) record1[15].data.ratings[j] = jamie_student_elo_ratings[j];
+
+    // 17. Avery
+    strcpy(record1[16].student_name, "Avery");
+    record1[16].student_elo_rating = 1250.0;
+    strcpy(record1[16].learn_goals, "Techniques");
+    record1[16].time_slot[0] = 10; record1[16].time_slot[1] = 1; record1[16].time_slot[2] = 3;
+    record1[16].time_slot[3] = 6; record1[16].time_slot[4] = 2;
+    strcpy(record1[16].preferred_coaching_style, "Aggressive");
+    record1[16].assigned_trainer_id = 0;
+    strcpy(record1[16].performance_data, "Endgame");
+    record1[16].data.games_won = 10;
+    record1[16].data.puzzles_solved = 60;
+    int avery_student_elo_ratings[] = {1250, 1260, 1270, 1280, 1290, 1300, 1310, 1320, 1330, 1340, 1350, 1355};
+    for (int j = 0; j < 12; j++) record1[16].data.ratings[j] = avery_student_elo_ratings[j];
+
+    // 18. Riley
+    strcpy(record1[17].student_name, "Riley");
+    record1[17].student_elo_rating = 1905.0;
+    strcpy(record1[17].learn_goals, "Study");
+    record1[17].time_slot[0] = 8; record1[17].time_slot[1] = 10; record1[17].time_slot[2] = 4;
+    record1[17].time_slot[3] = 6; record1[17].time_slot[4] = 1;
+    strcpy(record1[17].preferred_coaching_style, "Defensive");
+    record1[17].assigned_trainer_id = 0;
+    strcpy(record1[17].performance_data, "Tactics");
+    record1[17].data.games_won = 32;
+    record1[17].data.puzzles_solved = 77;
+    int riley2_student_elo_ratings_2[] = {1905, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2005};
+    for (int j = 0; j < 12; j++) record1[17].data.ratings[j] = riley2_student_elo_ratings_2[j];
+
+    // 19. Skylar
+    strcpy(record1[18].student_name, "Skylar");
+    record1[18].student_elo_rating = 1405.0;
+    strcpy(record1[18].learn_goals, "Understanding");
+    record1[18].time_slot[0] = 3; record1[18].time_slot[1] = 9; record1[18].time_slot[2] = 2;
+    record1[18].time_slot[3] = 4; record1[18].time_slot[4] = 7;
+    strcpy(record1[18].preferred_coaching_style, "Aggressive");
+    record1[18].assigned_trainer_id = 0;
+    strcpy(record1[18].performance_data, "Opening");
+    record1[18].data.games_won = 22;
+    record1[18].data.puzzles_solved = 85;
+    int skylar_student_elo_ratings[] = {1405, 1410, 1420, 1430, 1440, 1450, 1460, 1470, 1480, 1490, 1500, 1510};
+    for (int j = 0; j < 12; j++) record1[18].data.ratings[j] = skylar_student_elo_ratings[j];
+
+    // 20. Quinn
+    strcpy(record1[19].student_name, "Quinn");
+    record1[19].student_elo_rating = 1305.0;
+    strcpy(record1[19].learn_goals, "Focus");
+    record1[19].time_slot[0] = 2; record1[19].time_slot[1] = 5; record1[19].time_slot[2] = 6;
+    record1[19].time_slot[3] = 9; record1[19].time_slot[4] = 1;
+    strcpy(record1[19].preferred_coaching_style, "Defensive");
+    record1[19].assigned_trainer_id = 0;
+    strcpy(record1[19].performance_data, "Positional Play");
+    record1[19].data.games_won = 35;
+    record1[19].data.puzzles_solved = 80;
+    int quinn_student_elo_ratings[] = {1305, 1320, 1330, 1340, 1350, 1360, 1370, 1380, 1390, 1400, 1405, 1410};
+    for (int j = 0; j < 12; j++) record1[19].data.ratings[j] = quinn_student_elo_ratings[j];
+    
+}
+
+void hardcode2(struct trainer_attribute record2[]) {
+    
+    // 0. Trainer 1
+    record2[0].trainer_id = 1;
+    strcpy(record2[0].trainer_name, "Alex");
+    record2[0].trainer_elo_rating = 1450.0;
+    strcpy(record2[0].coaching_style, "Aggressive");
+    record2[0].free_time_slot[0] = 1; record2[0].free_time_slot[1] = 2; 
+    record2[0].free_time_slot[2] = 3; record2[0].free_time_slot[3] = 5; 
+    record2[0].free_time_slot[4] = 10;
+    record2[0].experience_level = 5;
+    record2[0].qualify_elo = 1400.0;
+    record2[0].max_students = 5;
+
+    // 1. Trainer 2
+    record2[1].trainer_id = 2;
+    strcpy(record2[1].trainer_name, "Jamie");
+    record2[1].trainer_elo_rating = 1600.0;
+    strcpy(record2[1].coaching_style, "Defensive");
+    record2[1].free_time_slot[0] = 4; record2[1].free_time_slot[1] = 6; 
+    record2[1].free_time_slot[2] = 7; record2[1].free_time_slot[3] = 8; 
+    record2[1].free_time_slot[4] = 9;
+    record2[1].experience_level = 8;
+    record2[1].qualify_elo = 1550.0;
+    record2[1].max_students = 4;
+
+    // 2. Trainer 3
+    record2[2].trainer_id = 3;
+    strcpy(record2[2].trainer_name, "Jordan");
+    record2[2].trainer_elo_rating = 1700.0;
+    strcpy(record2[2].coaching_style, "Aggressive");
+    record2[2].free_time_slot[0] = 3; record2[2].free_time_slot[1] = 5; 
+    record2[2].free_time_slot[2] = 6; record2[2].free_time_slot[3] = 7; 
+    record2[2].free_time_slot[4] = 8;
+    record2[2].experience_level = 10;
+    record2[2].qualify_elo = 1600.0;
+    record2[2].max_students = 6;
+
+    // 3. Trainer 4
+    record2[3].trainer_id = 4;
+    strcpy(record2[3].trainer_name, "Taylor");
+    record2[3].trainer_elo_rating = 1800.0;
+    strcpy(record2[3].coaching_style, "Defensive");
+    record2[3].free_time_slot[0] = 1; record2[3].free_time_slot[1] = 3; 
+    record2[3].free_time_slot[2] = 4; record2[3].free_time_slot[3] = 8; 
+    record2[3].free_time_slot[4] = 9;
+    record2[3].experience_level = 7;
+    record2[3].qualify_elo = 1650.0;
+    record2[3].max_students = 3;
+
+    // 4. Trainer 5
+    record2[4].trainer_id = 5;
+    strcpy(record2[4].trainer_name, "Morgan");
+    record2[4].trainer_elo_rating = 1550.0;
+    strcpy(record2[4].coaching_style, "Aggressive");
+    record2[4].free_time_slot[0] = 2; record2[4].free_time_slot[1] = 6; 
+    record2[4].free_time_slot[2] = 8; record2[4].free_time_slot[3] = 5; 
+    record2[4].free_time_slot[4] = 7;
+    record2[4].experience_level = 6;
+    record2[4].qualify_elo = 1500.0;
+    record2[4].max_students = 5;
+
+    // 5. Trainer 6
+    record2[5].trainer_id = 6;
+    strcpy(record2[5].trainer_name, "Avery");
+    record2[5].trainer_elo_rating = 1650.0;
+    strcpy(record2[5].coaching_style, "Defensive");
+    record2[5].free_time_slot[0] = 1; record2[5].free_time_slot[1] = 2; 
+    record2[5].free_time_slot[2] = 4; record2[5].free_time_slot[3] = 6; 
+    record2[5].free_time_slot[4] = 8;
+    record2[5].experience_level = 9;
+    record2[5].qualify_elo = 1550.0;
+    record2[5].max_students = 6;
+
+    // 6. Trainer 7
+    record2[6].trainer_id = 7;
+    strcpy(record2[6].trainer_name, "Riley");
+    record2[6].trainer_elo_rating = 1900.0;
+    strcpy(record2[6].coaching_style, "Aggressive");
+    record2[6].free_time_slot[0] = 3; record2[6].free_time_slot[1] = 4; 
+    record2[6].free_time_slot[2] = 5; record2[6].free_time_slot[3] = 7; 
+    record2[6].free_time_slot[4] = 9;
+    record2[6].experience_level = 11;
+    record2[6].qualify_elo = 1800.0;
+    record2[6].max_students = 7;
+
+    // 7. Trainer 8
+    record2[7].trainer_id = 8;
+    strcpy(record2[7].trainer_name, "Kim");
+    record2[7].trainer_elo_rating = 1720.0;
+    strcpy(record2[7].coaching_style, "Defensive");
+    record2[7].free_time_slot[0] = 1; record2[7].free_time_slot[1] = 2; 
+    record2[7].free_time_slot[2] = 3; record2[7].free_time_slot[3] = 4; 
+    record2[7].free_time_slot[4] = 6;
+    record2[7].experience_level = 5;
+    record2[7].qualify_elo = 1500.0;
+    record2[7].max_students = 3;
+
+    // 8. Trainer 9
+    record2[8].trainer_id = 9;
+    strcpy(record2[8].trainer_name, "Skylar");
+    record2[8].trainer_elo_rating = 1750.0;
+    strcpy(record2[8].coaching_style, "Aggressive");
+    record2[8].free_time_slot[0] = 2; record2[8].free_time_slot[1] = 5; 
+    record2[8].free_time_slot[2] = 7; record2[8].free_time_slot[3] = 8; 
+    record2[8].free_time_slot[4] = 10;
+    record2[8].experience_level = 6;
+    record2[8].qualify_elo = 1600.0;
+    record2[8].max_students = 5;
+
+    // 9. Trainer 10
+    record2[9].trainer_id = 10;
+    strcpy(record2[9].trainer_name, "Jamie");
+    record2[9].trainer_elo_rating = 1500.0;
+    strcpy(record2[9].coaching_style, "Defensive");
+    record2[9].free_time_slot[0] = 3; record2[9].free_time_slot[1] = 6; 
+    record2[9].free_time_slot[2] = 8; record2[9].free_time_slot[3] = 1; 
+    record2[9].free_time_slot[4] = 2;
+    record2[9].experience_level = 4;
+    record2[9].qualify_elo = 1450.0;
+    record2[9].max_students = 6;
+
+    // 10. Trainer 11
+    record2[10].trainer_id = 11;
+    strcpy(record2[10].trainer_name, "Quinn");
+    record2[10].trainer_elo_rating = 1670.0;
+    strcpy(record2[10].coaching_style, "Aggressive");
+    record2[10].free_time_slot[0] = 4; record2[10].free_time_slot[1] = 5; 
+    record2[10].free_time_slot[2] = 8; record2[10].free_time_slot[3] = 9; 
+    record2[10].free_time_slot[4] = 10;
+    record2[10].experience_level = 10;
+    record2[10].qualify_elo = 1550.0;
+    record2[10].max_students = 5;
+
+    // 11. Trainer 12
+    record2[11].trainer_id = 12;
+    strcpy(record2[11].trainer_name, "Cameron");
+    record2[11].trainer_elo_rating = 1420.0;
+    strcpy(record2[11].coaching_style, "Defensive");
+    record2[11].free_time_slot[0] = 1; record2[11].free_time_slot[1] = 2; 
+    record2[11].free_time_slot[2] = 3; record2[11].free_time_slot[3] = 5; 
+    record2[11].free_time_slot[4] = 6;
+    record2[11].experience_level = 3;
+    record2[11].qualify_elo = 1400.0;
+    record2[11].max_students = 4;
+
+    // 12. Trainer 13
+    record2[12].trainer_id = 13;
+    strcpy(record2[12].trainer_name, "Jesse");
+    record2[12].trainer_elo_rating = 1560.0;
+    strcpy(record2[12].coaching_style, "Aggressive");
+    record2[12].free_time_slot[0] = 2; record2[12].free_time_slot[1] = 4; 
+    record2[12].free_time_slot[2] = 5; record2[12].free_time_slot[3] = 8; 
+    record2[12].free_time_slot[4] = 9;
+    record2[12].experience_level = 7;
+    record2[12].qualify_elo = 1500.0;
+    record2[12].max_students = 5;
+
+    // 13. Trainer 14
+    record2[13].trainer_id = 14;
+    strcpy(record2[13].trainer_name, "Casey");
+    record2[13].trainer_elo_rating = 1620.0;
+    strcpy(record2[13].coaching_style, "Defensive");
+    record2[13].free_time_slot[0] = 1; record2[13].free_time_slot[1] = 3; 
+    record2[13].free_time_slot[2] = 4; record2[13].free_time_slot[3] = 6; 
+    record2[13].free_time_slot[4] = 10;
+    record2[13].experience_level = 5;
+    record2[13].qualify_elo = 1400.0;
+    record2[13].max_students = 6;
+
+    // 14. Trainer 15
+    record2[14].trainer_id = 15;
+    strcpy(record2[14].trainer_name, "Taylor");
+    record2[14].trainer_elo_rating = 1590.0;
+    strcpy(record2[14].coaching_style, "Aggressive");
+    record2[14].free_time_slot[0] = 1; record2[14].free_time_slot[1] = 2; 
+    record2[14].free_time_slot[2] = 3; record2[14].free_time_slot[3] = 5; 
+    record2[14].free_time_slot[4] = 8;
+    record2[14].experience_level = 8;
+    record2[14].qualify_elo = 1500.0;
+    record2[14].max_students = 4;
+
+    // 15. Trainer 16
+    record2[15].trainer_id = 16;
+    strcpy(record2[15].trainer_name, "Jordan");
+    record2[15].trainer_elo_rating = 1750.0;
+    strcpy(record2[15].coaching_style, "Defensive");
+    record2[15].free_time_slot[0] = 3; record2[15].free_time_slot[1] = 5; 
+    record2[15].free_time_slot[2] = 7; record2[15].free_time_slot[3] = 9; 
+    record2[15].free_time_slot[4] = 10;
+    record2[15].experience_level = 9;
+    record2[15].qualify_elo = 1650.0;
+    record2[15].max_students = 6;
+
+    // 16. Trainer 17
+    record2[16].trainer_id = 17;
+    strcpy(record2[16].trainer_name, "Morgan");
+    record2[16].trainer_elo_rating = 1800.0;
+    strcpy(record2[16].coaching_style, "Aggressive");
+    record2[16].free_time_slot[0] = 1; record2[16].free_time_slot[1] = 2; 
+    record2[16].free_time_slot[2] = 4; record2[16].free_time_slot[3] = 6; 
+    record2[16].free_time_slot[4] = 8;
+    record2[16].experience_level = 7;
+    record2[16].qualify_elo = 1500.0;
+    record2[16].max_students = 5;
+
+    // 17. Trainer 18
+    record2[17].trainer_id = 18;
+    strcpy(record2[17].trainer_name, "Avery");
+    record2[17].trainer_elo_rating = 1640.0;
+    strcpy(record2[17].coaching_style, "Defensive");
+    record2[17].free_time_slot[0] = 2; record2[17].free_time_slot[1] = 3; 
+    record2[17].free_time_slot[2] = 5; record2[17].free_time_slot[3] = 7; 
+    record2[17].free_time_slot[4] = 9;
+    record2[17].experience_level = 5;
+    record2[17].qualify_elo = 1400.0;
+    record2[17].max_students = 6;
+
+    // 18. Trainer 19
+    record2[18].trainer_id = 19;
+    strcpy(record2[18].trainer_name, "Riley");
+    record2[18].trainer_elo_rating = 1570.0;
+    strcpy(record2[18].coaching_style, "Aggressive");
+    record2[18].free_time_slot[0] = 1; record2[18].free_time_slot[1] = 4; 
+    record2[18].free_time_slot[2] = 6; record2[18].free_time_slot[3] = 7; 
+    record2[18].free_time_slot[4] = 8;
+    record2[18].experience_level = 6;
+    record2[18].qualify_elo = 1450.0;
+    record2[18].max_students = 5;
+
+    // 19. Trainer 20
+    record2[19].trainer_id = 20;
+    strcpy(record2[19].trainer_name, "Taylor");
+    record2[19].trainer_elo_rating = 1600.0;
+    strcpy(record2[19].coaching_style, "Defensive");
+    record2[19].free_time_slot[0] = 1; record2[19].free_time_slot[1] = 2; 
+    record2[19].free_time_slot[2] = 3; record2[19].free_time_slot[3] = 5; 
+    record2[19].free_time_slot[4] = 10;
+    record2[19].experience_level = 8;
+    record2[19].qualify_elo = 1500.0;
+    record2[19].max_students = 4;
+    
+}
+
+void merge_self_strongest(struct trainer_attribute trainer_DB[], int l, int m, int n, struct trainer_attribute temp5[], float average[]){
+    int i = l, j = m + 1, k = l;
+    while ((i <= m) && (j <= n))
+    {
+        if (average[i] > average[j])
+        {
+            temp5[k++] = trainer_DB[i++];
+        }
+        else
+        {
+            temp5[k++] = trainer_DB[j++];
+        }
+    }
+
+    while (i <= m)
+    {
+        temp5[k++] = trainer_DB[i++];
+    }
+
+    while (j <= n)
+    {
+        temp5[k++] = trainer_DB[j++];
+    }
+
+    for (i = l; i <= n; i++)
+    {
+        trainer_DB[i] = temp5[i];
+    }
+}
+
+void merge_sort_strongest(struct trainer_attribute trainer_DB[], struct trainer_attribute temp5[], int lo, int hi, float average[]){
+     if (lo < hi)
+    {
+        int mid = lo + (hi - lo) / 2;
+        merge_sort_strongest(trainer_DB, temp5, lo, mid, average);
+        merge_sort_strongest(trainer_DB, temp5, mid + 1, hi, average);
+        merge_self_strongest(trainer_DB, lo, mid, hi, temp5, average);
+    }
+}
+
+void strongest(struct trainer_attribute trainer_DB[], struct trainer_attribute temp5[], int lo, int hi, float average[]){
+    merge_sort_strongest(trainer_DB, temp5, lo, hi, average);
+    printf("Strongest Trainer Name: %s ID: %d\n", trainer_DB[0].trainer_name, trainer_DB[0].trainer_id);
+}
+
 void main()
 {
     // student info variables
@@ -672,6 +1266,7 @@ void main()
     int status;
 
     struct student_attribute student_DB[STUD_DB_SIZE];
+
     int status1, status2;
 
     // trainer info variables
@@ -685,21 +1280,28 @@ void main()
     int max, train_records, status3, status4;
     struct trainer_attribute trainer_DB[TRAIN_DB_SIZE];
 
-    // Intializing DB vales to zero.
-
-    Initialize_student_DB(student_DB, STUD_DB_SIZE);
-    Initialize_trainer_DB(trainer_DB, TRAIN_DB_SIZE);
-
+    //Other variables
     int user_input;
-
     int exit = 0;
-
     int count[TRAIN_DB_SIZE];
     float average[TRAIN_DB_SIZE];
-
     struct student_attribute list[STUD_DB_SIZE];
+    struct student_attribute temp1[STUD_DB_SIZE];
+    struct student_attribute temp2[STUD_DB_SIZE];
+    struct trainer_attribute temp3[TRAIN_DB_SIZE];
+    struct trainer_attribute temp5[TRAIN_DB_SIZE];
+    int size_succesive;
 
+    // Intializing DB vales to zero.
+    Initialize_student_DB(student_DB, STUD_DB_SIZE);
+    Initialize_trainer_DB(trainer_DB, TRAIN_DB_SIZE);
     Initialize_student_DB(list, stud_records);
+
+    //hardcoded values for 20 students and trainers
+    hardcode1(student_DB);
+    hardcode2(trainer_DB);
+
+    
     do
     {
         printf("Functions to perform: \n");
@@ -739,7 +1341,7 @@ void main()
                         scanf("%d", &info.ratings[j]);
                     }
 
-                    status1 = insert_update_student(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating, goals, slot, style, assigned_train_id, performance, info);
+                    status1 = insert_update_student(student_DB, 20 + stud_records, stud_name, stud_elo_rating, goals, slot, style, assigned_train_id, performance, info);
 
                     if (!status1)
                     {
@@ -779,7 +1381,7 @@ void main()
                     printf("Max Students: ");
                     scanf("%d", &max);
 
-                    status3 = insert_update_trainer(trainer_DB, TRAIN_DB_SIZE, train_id, train_name, train_elo_rating, coach_style, train_slot, experience, qualify, max);
+                    status3 = insert_update_trainer(trainer_DB, 20 + train_records, train_id, train_name, train_elo_rating, coach_style, train_slot, experience, qualify, max);
 
                     if (!status3)
                     {
@@ -798,7 +1400,7 @@ void main()
                 scanf("%s", &stud_name);
                 printf("Enter the elo rating of student: ");
                 scanf("%f", &stud_elo_rating);
-                int status2 = delete_student_record(student_DB, STUD_DB_SIZE, stud_name, stud_elo_rating);
+                int status2 = delete_student_record(student_DB, 20+stud_records, stud_name, stud_elo_rating);
 
                 if (status2)
                 {
@@ -814,7 +1416,7 @@ void main()
                 printf("Enter trainer ID to be deleted: ");
                 scanf("%d", &train_id);
 
-                status4 = delete_trainer_record(trainer_DB, TRAIN_DB_SIZE, train_id);
+                status4 = delete_trainer_record(trainer_DB, 20+train_records, train_id);
 
                 if (status4)
                 {
@@ -828,44 +1430,44 @@ void main()
 
             case 5: 
                 printf("Student-Trainer list:\n");
-                student_trainer_list(student_DB, trainer_DB, STUD_DB_SIZE, TRAIN_DB_SIZE);
+                student_trainer_list(student_DB, trainer_DB, 20+ stud_records, 20+ train_records);
                 break;
 
             case 6: 
-                struct student_attribute temp1[STUD_DB_SIZE];
-                sort_students_elo_rating(student_DB, temp1, STUD_DB_SIZE);
-                print_stud(student_DB, stud_records);
+                
+                sort_students_elo_rating(student_DB, temp1, 20+stud_records);
+                print_stud(student_DB, 20+stud_records);
                 break;
 
             case 7: 
-                struct trainer_attribute temp3[TRAIN_DB_SIZE];
-                most_popular_trainer(trainer_DB, TRAIN_DB_SIZE, 0, train_records - 1, average, count);
-                mergeSort_popularity(trainer_DB, temp3, 0, train_records - 1, average, count);
+                average_elo(trainer_DB, student_DB, 20+stud_records, 20+train_records, average);
+                most_popular_trainer(trainer_DB, 20+train_records, 0, 20+train_records - 1, average, count);                
                 break;
-                print_trainers(trainer_DB, TRAIN_DB_SIZE);
+                
 
             case 8:
-                average_elo(trainer_DB, student_DB, STUD_DB_SIZE, TRAIN_DB_SIZE, average);
-                print_trainers(trainer_DB, TRAIN_DB_SIZE);
+                average_elo(trainer_DB, student_DB, 20 + stud_records, 20+train_records, average);
+                strongest(trainer_DB, temp5, 0 , 20+train_records-1, average);
+                break;
 
             case 9:
-                match_pairs(count, student_DB, trainer_DB, STUD_DB_SIZE, TRAIN_DB_SIZE);
-                print_stud(student_DB, stud_records);
+                match_pairs(count, student_DB, trainer_DB, 20 + stud_records, 20+train_records);
+                print_stud(student_DB, 20 + stud_records);
                 break;
 
             case 10:
-                int size_succesive = successive_increase(student_DB, STUD_DB_SIZE, list);
-                struct student_attribute temp2[STUD_DB_SIZE];
+                size_succesive = successive_increase(student_DB, 20 + stud_records, list);
+                
                 mergeSort_decreasing_gains(list, temp2, 0, size_succesive-1);
-                print_stud(student_DB, STUD_DB_SIZE);
+                print_stud(list, size_succesive);
                 break;
 
             case 11:
-                print_stud(student_DB, STUD_DB_SIZE);
+                print_stud(student_DB, 20+ stud_records);
                 break;
 
             case 12:
-                print_trainers(trainer_DB, TRAIN_DB_SIZE);
+                print_trainers(trainer_DB, 20+train_records);
                 break;
 
             case 13:
@@ -876,31 +1478,4 @@ void main()
                 printf("Enter appropriate number for function!");
         }
     }while(exit == 0);
-    
-
-    // Asking number of student records and taking input.
-
-    
-
-    
-
-    // To delete a student record
-
-    // To delete a trainer record
-    
-    // Ensure that stud_records is updated accoring to insert and delete functions.
-
-    // Function call to sort student based on elo_rating.
-
-    
-
-    // answer to question 12
-
-    
-
-    
-
-    
-    //print_stud(list, size_succesive)
-
 };

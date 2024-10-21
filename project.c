@@ -572,7 +572,7 @@ void merge_self_popularity(struct trainer_attribute trainer_DB[], int l, int m, 
             else if (average[i] == average[j])
             {
 
-                if (strcmp(trainer_DB[i].trainer_name, trainer_DB[j].trainer_name) < 0)
+                if (trainer_DB[i].trainer_elo_rating > trainer_DB[j].trainer_elo_rating)
                 {
                     temp[k++] = trainer_DB[i++];
                 }

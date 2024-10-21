@@ -474,6 +474,7 @@ int successive_increase(struct student_attribute student_DB[], int stud_records,
 void match_pairs(int count[], struct student_attribute students[], struct trainer_attribute trainers[], int stud_records, int train_records)
 {
     int best_match, time_match; 
+    int found=0;
     for (int i = 0; i < train_records; i++)
     {
         count[i] = 0;
@@ -482,7 +483,7 @@ void match_pairs(int count[], struct student_attribute students[], struct traine
     for (int i = 0; i < stud_records; i++)
     {
         best_match = -1;
-        for (int j = 0; j < train_records; j++)
+        for (int j = 0; j < train_records && !found; j++)
         {
             if (count[j] < trainers[j].max_students)
             {
@@ -504,7 +505,7 @@ void match_pairs(int count[], struct student_attribute students[], struct traine
                         if (students[i].student_elo_rating >= trainers[j].qualify_elo)
                         {
                             best_match = j;
-                            break;
+                            found=1;
                         }
                         else if (best_match == -1 || trainers[j].qualify_elo < trainers[best_match].qualify_elo)
                         {
